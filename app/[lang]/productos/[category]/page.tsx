@@ -7,6 +7,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { use } from "react"
 import { getProductsByCategory } from "@/lib/products"
+import { products } from "@/lib/products"
 
 const categoryData = {
   "motores-puertas-abatibles": {
@@ -112,7 +113,7 @@ export default function CategoryPage({ params }: { params: Promise<{ lang: strin
 
         {/* Products Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {t.products.map((product, index) => (
+          {products.map((product, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 30 }}
@@ -130,7 +131,7 @@ export default function CategoryPage({ params }: { params: Promise<{ lang: strin
                   height={300}
                   className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                 />
-                {product.featured && (
+                {product.features && (
                   <div className="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full text-sm font-medium flex items-center">
                     <HiStar className="w-4 h-4 mr-1" />
                     Destacado
