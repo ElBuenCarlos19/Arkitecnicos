@@ -32,7 +32,7 @@ const translations = {
     },
     contact: {
       title: "Contacto",
-      address: "Av. Tecnológico 1234, CDMX",
+      address: "Av. 20 de Julio # 80-205, Nte. Centro Historico, Barranquilla, Atlántico",
       phone: "+52 (55) 1234-5678",
       email: "contacto@arkitecnicos.com",
     },
@@ -64,7 +64,7 @@ const translations = {
     },
     contact: {
       title: "Contact",
-      address: "Av. Tecnológico 1234, CDMX",
+      address: "Av. 20 de Julio # 80-205, Nte. Centro Historico, Barranquilla, Atlántico",
       phone: "+52 (55) 1234-5678",
       email: "contacto@arkitecnicos.com",
     },

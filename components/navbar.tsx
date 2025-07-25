@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { HiMenu, HiX, HiGlobeAlt, HiChevronDown } from "react-icons/hi"
 import { Button } from "@/components/ui/button"
 import { CartButton } from "@/components/cart-button"
+import Image from "next/image"
 
 const translations = {
   es: {
@@ -118,7 +119,7 @@ export function Navbar({ lang }: NavbarProps) {
           {/* Logo */}
           <Link href={`/${lang}`} className="flex items-center space-x-2">
             <motion.div whileHover={{ scale: 1.05 }} className="text-2xl font-bold text-primary">
-              Arkitécnicos
+              <Image src={"/logo.png"} alt="Logo Arkitecnicos" width={70} height={70} />
             </motion.div>
           </Link>
 

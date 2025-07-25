@@ -7,10 +7,10 @@ import Image from "next/image"
 
 const translations = {
   es: {
-    title: "Quiénes Somos",
+    title: "Quienes Somos",
     subtitle: "Líderes en Automatización Industrial",
     description:
-      "Con más de 15 años de experiencia, Arkitécnicos se ha consolidado como una empresa líder en el desarrollo de soluciones de automatización industrial. Nuestro equipo de ingenieros especializados trabaja día a día para transformar los procesos industriales mediante tecnología de vanguardia.",
+      "Dentro de las expectativas de un País en desarrollo se fundó ARKITECNICOS WALL SAS, una Empresa con toda la experiencia en el área de la Arquitectura, Construcción, Remodelación, Servicios en acabados arquitectónicos e integrales, Mantenimiento, Reparaciones en todas las actividades integrales de la cadena del proceso constructivo.",
     mission: {
       title: "Nuestra Misión",
       description:
@@ -89,10 +89,10 @@ export function AboutSection({ lang }: AboutSectionProps) {
             viewport={{ once: true }}
           >
             <Image
-              src="/placeholder.svg?height=500&width=600"
+              src="/team.png"
               alt="Arkitécnicos Team"
-              width={600}
-              height={500}
+              width={500}
+              height={300}
               className="w-full h-auto rounded-2xl shadow-lg"
             />
           </motion.div>
@@ -108,8 +108,8 @@ export function AboutSection({ lang }: AboutSectionProps) {
 
             <div className="grid grid-cols-2 gap-6">
               <div className="bg-white p-6 rounded-xl shadow-sm">
-                <div className="text-3xl font-bold text-primary mb-2">150+</div>
-                <div className="text-sm text-neutral">Proyectos Completados</div>
+                <div className="text-3xl font-bold text-primary mb-2">100+</div>
+                <div className="text-sm text-neutral">Trabajos Completados</div>
               </div>
               <div className="bg-white p-6 rounded-xl shadow-sm">
                 <div className="text-3xl font-bold text-primary mb-2">15+</div>

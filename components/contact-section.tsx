@@ -217,11 +217,11 @@ export function ContactSection({ lang }: ContactSectionProps) {
             </div>
 
             {/* Map placeholder */}
-            <div className="bg-white/5 rounded-2xl p-6 h-64 flex items-center justify-center">
+            <div className="bg-white/5 rounded-2xl p-6 h-64 flex items-center justify-center ">
               <div className="text-center text-gray-400">
-                <HiLocationMarker className="w-12 h-12 mx-auto mb-2" />
-                <p>Mapa Interactivo</p>
-                <p className="text-sm">Ubicación de nuestras oficinas</p>
+              <iframe
+               className="rounded-2xl"
+               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3916.5517683844973!2d-74.81769919999999!3d10.997166199999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8ef42d77351c46a3%3A0xb3a717a6efe0fece!2sArkitecnicos%20es%20Arkigarajes!5e0!3m2!1sen!2sco!4v1753454097710!5m2!1sen!2sco" width="582" height="256" loading="lazy"></iframe>
               </div>
             </div>
           </motion.div>

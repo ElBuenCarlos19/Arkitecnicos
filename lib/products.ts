@@ -4,10 +4,10 @@ export const products: Product[] = [
   // Motores para Puertas Abatibles
   {
     id: "motor-abatible-pro-400",
-    name: "Motor Abatible Pro 400",
+    name: "BULLDOZER 850",
     description: "Motor de alta potencia para puertas abatibles de hasta 400kg por hoja",
     price: 1200,
-    image: "/placeholder.svg?height=400&width=400&text=Motor+Pro+400",
+    image: "/ejemplo1.jpg",
     category: "motores-puertas-abatibles",
     specifications: {
       Potencia: "400W",
@@ -29,10 +29,10 @@ export const products: Product[] = [
   },
   {
     id: "motor-abatible-eco-250",
-    name: "Motor Abatible Eco 250",
+    name: "FOX 1000 PRO",
     description: "Solución económica para puertas residenciales de hasta 250kg por hoja",
     price: 800,
-    image: "/placeholder.svg?height=400&width=400&text=Motor+Eco+250",
+    image: "/ejemplo2.jpg",
     category: "motores-puertas-abatibles",
     specifications: {
       Potencia: "250W",
@@ -54,10 +54,10 @@ export const products: Product[] = [
   // Motores para Puertas de Garaje
   {
     id: "motor-garaje-premium-800",
-    name: "Motor Garaje Premium 800",
+    name: "PITBULL 400",
     description: "Motor premium para puertas de garaje seccionales y basculantes",
     price: 1500,
-    image: "/placeholder.svg?height=400&width=400&text=Motor+Garaje+800",
+    image: "/ejemplo3.jpg",
     category: "motores-puertas-garaje",
     specifications: {
       Potencia: "800W",

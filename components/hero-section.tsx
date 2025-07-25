@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion"
 import { HiArrowRight, HiLightningBolt, HiShieldCheck } from "react-icons/hi"
-import { FaAward } from "react-icons/fa"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { useEffect, useState } from "react"
@@ -10,17 +9,27 @@ import Link from "next/link"
 
 const translations = {
   es: {
-    title: "Automatización Industrial",
-    subtitle: "del Futuro",
+    title: "Arkitecnicos",
+    subtitle: "WALL S.A.S",
     description:
       "Transformamos procesos industriales con tecnología de vanguardia. Más de 15 años automatizando el éxito de nuestros clientes.",
     cta1: "Conocer Servicios",
     cta2: "Ver Productos",
     stats: {
-      projects: "Proyectos",
+      projects: "Trabajos",
       experience: "Años",
       clients: "Clientes",
     },
+    prevwords: 'Contamos con ',
+    words: [
+      "Puertas Abatibles",
+      "Puertas de Garaje",
+      "Puertas Corredizas",
+      "Cortinas Enrollables",
+      "Puertas Peatonales",
+      "Talanqueras",
+      "Cercados electricos"
+    ]
   },
   en: {
     title: "Industrial Automation",
@@ -30,10 +39,20 @@ const translations = {
     cta1: "Our Services",
     cta2: "View Products",
     stats: {
-      projects: "Projects",
+      projects: "Works",
       experience: "Years",
       clients: "Clients",
     },
+    prevwords: 'We have ',
+    words: [
+      "Swing Doors",
+      "Garage Doors",
+      "Sliding Doors",
+      "Roller Blinds",
+      "Pedestrian Doors",
+      "Boom Barriers",
+      "Electric Barriers"
+    ]
   },
 }
 
@@ -44,27 +63,37 @@ interface HeroSectionProps {
 // Posiciones fijas para los elementos animados
 const animatedElements = [
   { left: "10%", top: "20%", duration: 3 },
-  { left: "80%", top: "15%", duration: 4 },
+  { left: "95%", top: "30%", duration: 4 },
   { left: "15%", top: "60%", duration: 3.5 },
-  { left: "70%", top: "70%", duration: 4.5 },
+  { left: "40%", top: "70%", duration: 4.5 },
   { left: "30%", top: "30%", duration: 3.2 },
-  { left: "85%", top: "45%", duration: 4.2 },
+  { left: "50%", top: "45%", duration: 4.2 },
+  { left: "10%", top: "50%", duration: 4.2 },
+  { left: "90%", top: "60%", duration: 4.2 },
 ]
 
 export function HeroSection({ lang }: HeroSectionProps) {
   const [mounted, setMounted] = useState(false)
   const t = translations[lang as keyof typeof translations] || translations.es
+  const [wordsindex, setWordsIndex] = useState(0);
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setWordsIndex(prev => (prev + 1) % t.words.length);
+    }, 2000); // cambia cada 2 segundos
+
+    return () => clearInterval(interval);
+  }, []);
   return (
     <section id="inicio" className="relative h-screen flex items-center overflow-hidden">
       {/* Background with overlay */}
       <div className="absolute inset-0 gradient-bg">
         <div className="absolute inset-0 bg-black/40" />
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/80 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#212529]/80 to-primary/40" />
       </div>
 
       {/* Animated background elements */}
@@ -93,14 +122,14 @@ export function HeroSection({ lang }: HeroSectionProps) {
       )}
 
       <div className="container-custom section-padding relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Content */}
-          <div className="text-white">
+          <div className="text-white grid grid-rows-6 ">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
-              className="space-y-6"
+              className="space-y-6 row-span-5 items-start flex flex-col justify-center "
             >
               <div className="flex items-center space-x-2 text-accent">
                 <HiLightningBolt className="w-5 h-5" />
@@ -112,7 +141,7 @@ export function HeroSection({ lang }: HeroSectionProps) {
                 <span className="block text-accent">{t.subtitle}</span>
               </h1>
 
-              <p className="text-xl text-gray-200 max-w-2xl leading-relaxed">{t.description}</p>
+              <TypewriterEffect t={t} />
 
               <div className="flex flex-col sm:flex-row gap-4 pt-6">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -143,12 +172,12 @@ export function HeroSection({ lang }: HeroSectionProps) {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="grid grid-cols-3 gap-4 pt-4 mt-6 border-t border-white/20"
+              className="grid grid-cols-2 gap-4 pt-4 mt-6 border-t row-span-1
+               border-white/20"  
             >
               {[
-                { number: "150+", label: t.stats.projects },
+                { number: "100+", label: t.stats.projects },
                 { number: "15+", label: t.stats.experience },
-                { number: "98%", label: t.stats.clients },
               ].map((stat, index) => (
                 <div key={index} className="text-center ">
                   <motion.div
@@ -174,7 +203,7 @@ export function HeroSection({ lang }: HeroSectionProps) {
           >
             <div className="relative">
               <Image
-                src="/placeholder.svg?height=500&width=500&text=Automatización+Industrial"
+                src="/image.png"
                 alt="Automatización Industrial"
                 width={500}
                 height={500}
@@ -183,36 +212,64 @@ export function HeroSection({ lang }: HeroSectionProps) {
 
               {/* Floating elements */}
               <motion.div
-                animate={{ y: [0, -10, 0] }}
+                animate={{ y: [0, -5, 0] }}
                 transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
-                className="absolute -top-4 -right-4 bg-white rounded-full p-4 shadow-lg"
+                className="absolute -top-3 -right-4 bg-white rounded-full p-4 shadow-lg"
               >
                 <HiShieldCheck className="w-8 h-8 text-primary" />
               </motion.div>
 
-              <motion.div
-                animate={{ y: [0, 10, 0] }}
-                transition={{ duration: 2.5, repeat: Number.POSITIVE_INFINITY }}
-                className="absolute -bottom-4 -left-4 bg-accent rounded-full p-4 shadow-lg"
-              >
-                <FaAward className="w-8 h-8 text-white" />
-              </motion.div>
             </div>
           </motion.div>
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <motion.div
-        animate={{ y: [0, 10, 0] }}
-        transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white"
-      >
-        <div className="flex flex-col items-center space-y-2">
-          <span className="text-sm">Scroll</span>
-          <div className="w-px h-8 bg-white/50" />
-        </div>
-      </motion.div>
+
     </section>
   )
+}
+
+function TypewriterEffect({ t }: { t: (typeof translations)['es'] }) {
+  const [wordIndex, setWordIndex] = useState(0);
+  const [charIndex, setCharIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [displayText, setDisplayText] = useState('');
+
+  const typingSpeed = isDeleting ? 50 : 100;
+  const pauseTime = 1000;
+
+  useEffect(() => {
+    const currentWord = t.words[wordIndex];
+    let timeout: NodeJS.Timeout;
+
+    if (!isDeleting && charIndex <= currentWord.length) {
+      setDisplayText(currentWord.slice(0, charIndex));
+      timeout = setTimeout(() => setCharIndex((c) => c + 1), typingSpeed);
+    } else if (isDeleting && charIndex >= 0) {
+      setDisplayText(currentWord.slice(0, charIndex));
+      timeout = setTimeout(() => setCharIndex((c) => c - 1), typingSpeed);
+    } else {
+      timeout = setTimeout(() => {
+        if (!isDeleting) {
+          setIsDeleting(true);
+        } else {
+          setIsDeleting(false);
+          setWordIndex((prev) => (prev + 1) % t.words.length);
+        }
+      }, pauseTime);
+    }
+
+    return () => clearTimeout(timeout);
+  }, [charIndex, isDeleting, wordIndex, t.words]);
+
+  return (
+    <span className="inline-bloc text-white px-4 py-2 font-bold whitespace-nowrap text-lg leading-relaxed">
+    {t.prevwords}
+    {charIndex > 0 && (
+      <span className="border-r-2 border-white animate-blink ml-1">
+        {displayText}
+      </span>
+    )}
+  </span>
+  );
 }
