@@ -16,6 +16,7 @@ const poppins = Poppins({
 export const metadata = {
   title: "Arkitécnicos - Automatismos Industriales",
   description: "Empresa líder en automatismos industriales y soluciones tecnológicas avanzadas",
+  icon: "/logo.png",
 }
 
 export default function RootLayout({
@@ -25,7 +26,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" className={`${inter.variable} ${poppins.variable}`}>
-      
+      <link rel="icon" href="/logo.png" />
       <body className="font-sans antialiased">{children}</body>
     </html>
   )

@@ -22,8 +22,8 @@ const translations = {
     },
     info: {
       title: "Información de Contacto",
-      address: "Av. Tecnológico 1234, Col. Industrial, Ciudad de México, CP 01234",
-      phone: "+52 (55) 1234-5678",
+      address: "Av. 20 de Julio # 80-205, Nte. Centro Historico, Barranquilla, Atlántico",
+      phone: "+57 30000000",
       email: "contacto@arkitecnicos.com",
       hours: "Lun - Vie: 8:00 AM - 6:00 PM",
     },
@@ -43,8 +43,8 @@ const translations = {
     },
     info: {
       title: "Contact Information",
-      address: "Av. Tecnológico 1234, Col. Industrial, Mexico City, CP 01234",
-      phone: "+52 (55) 1234-5678",
+      address: "Av. 20 de Julio # 80-205, Nte. Centro Historico, Barranquilla, Atlántico",
+      phone: "+57 30000000",
       email: "contact@arkitecnicos.com",
       hours: "Mon - Fri: 8:00 AM - 6:00 PM",
     },
