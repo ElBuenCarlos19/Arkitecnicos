@@ -4,22 +4,24 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { 
-  HiMenu, 
-  HiX, 
-  HiGlobeAlt, 
-  HiChevronDown, 
+import {
+  HiMenu,
+  HiX,
+  HiGlobeAlt,
+  HiChevronDown,
   HiHome,
   HiUsers,
   HiCog,
   HiCube,
   HiBriefcase,
   HiMail,
-  HiChevronLeft
 } from "react-icons/hi"
 import { Button } from "@/components/ui/button"
 import { CartButton } from "@/components/cart-button"
 import Image from "next/image"
+import { getAllProductsCategory } from "@/lib/db/products_category"
+import type { ProductCategory } from "@/lib/types/product"
+import "@/app/globals.css"
 
 const translations = {
   es: {
@@ -31,12 +33,6 @@ const translations = {
     contact: "Contacto",
     productCategories: {
       title: "Categorías de Productos",
-      abatibles: "Motores para Puertas Abatibles",
-      garaje: "Motores para Puertas de Garaje",
-      corredizas: "Motores para Puertas Corredizas",
-      cortinas: "Motores para Cortinas Enrollables",
-      peatonales: "Motores para Puertas Peatonales",
-      talanqueras: "Talanqueras",
     },
   },
   en: {
@@ -48,12 +44,6 @@ const translations = {
     contact: "Contact",
     productCategories: {
       title: "Product Categories",
-      abatibles: "Swing Gate Motors",
-      garaje: "Garage Door Motors",
-      corredizas: "Sliding Gate Motors",
-      cortinas: "Rolling Shutter Motors",
-      peatonales: "Pedestrian Door Motors",
-      talanqueras: "Barrier Gates",
     },
   },
 }
@@ -69,6 +59,7 @@ export function Navbar({ lang }: NavbarProps) {
   const [productsDropdown, setProductsDropdown] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const [productCategories, setProductCategories] = useState<ProductCategory[]>([])
 
   const pathname = usePathname()
   const isHomePage = pathname === `/${lang}` || pathname === "/"
@@ -84,6 +75,19 @@ export function Navbar({ lang }: NavbarProps) {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const categories = await getAllProductsCategory()
+        setProductCategories(categories)
+      } catch (error) {
+        console.error("Error loading categories:", error)
+      }
+    }
+
+    loadCategories()
+  }, [])
+
   const navItems = [
     { href: `/${lang}#inicio`, label: t.home, icon: HiHome },
     { href: `/${lang}#nosotros`, label: t.about, icon: HiUsers },
@@ -91,15 +95,6 @@ export function Navbar({ lang }: NavbarProps) {
     { href: `/${lang}/productos`, label: t.products, icon: HiCube, hasDropdown: true },
     { href: `/${lang}#trabajos`, label: t.works, icon: HiBriefcase },
     { href: `/${lang}#contacto`, label: t.contact, icon: HiMail },
-  ]
-
-  const productCategories = [
-    { slug: "motores-puertas-abatibles", label: t.productCategories.abatibles },
-    { slug: "motores-puertas-garaje", label: t.productCategories.garaje },
-    { slug: "motores-puertas-corredizas", label: t.productCategories.corredizas },
-    { slug: "motores-cortinas-enrollables", label: t.productCategories.cortinas },
-    { slug: "motores-puertas-peatonales", label: t.productCategories.peatonales },
-    { slug: "talanqueras", label: t.productCategories.talanqueras },
   ]
 
   if (!mounted) {
@@ -118,9 +113,9 @@ export function Navbar({ lang }: NavbarProps) {
     <>
       {/* Mobile Menu Button - Solo visible en móvil */}
       <div className="lg:hidden fixed top-4 right-4 z-50">
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => setIsMobileOpen(!isMobileOpen)}
           className="bg-white/90 backdrop-blur-md shadow-lg"
         >
@@ -139,21 +134,18 @@ export function Navbar({ lang }: NavbarProps) {
           setProductsDropdown(false)
         }}
         className={`hidden lg:flex fixed top-0 right-0 z-50 h-screen transition-all duration-300 ease-in-out ${
-          isExpanded ? 'w-64' : 'w-16'
+          isExpanded ? "w-64" : "w-16"
         } bg-white/95 backdrop-blur-md shadow-lg`}
       >
         <div className="flex flex-col w-full">
           {/* Logo */}
           <div className="flex items-center justify-center py-4 border-b border-gray-200">
             <Link href={`/${lang}`} className="flex items-center">
-              <motion.div 
-                whileHover={{ scale: 1.05 }} 
-                className="text-primary"
-              >
-                <Image 
-                  src={"/logo.png"} 
-                  alt="Logo Arkitecnicos" 
-                  width={isExpanded ? 50 : 40} 
+              <motion.div whileHover={{ scale: 1.05 }} className="text-primary">
+                <Image
+                  src={"/logo.png"}
+                  alt="Logo Arkitecnicos"
+                  width={isExpanded ? 50 : 40}
                   height={isExpanded ? 50 : 40}
                   className="transition-all duration-300"
                 />
@@ -164,9 +156,10 @@ export function Navbar({ lang }: NavbarProps) {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -10 }}
-                    className="ml-3 text-lg font-bold text-primary whitespace-nowrap"
+                    className="ml-3 text-lg text-primary whitespace-nowrap"
+                    id="letraArkitecnicos"
                   >
-                    Arkitécnicos
+                    Arkitecnicos
                   </motion.span>
                 )}
               </AnimatePresence>
@@ -187,7 +180,7 @@ export function Navbar({ lang }: NavbarProps) {
                 >
                   {item.hasDropdown ? (
                     <div className="relative">
-                      <button 
+                      <button
                         className="w-full flex items-center px-4 py-3 text-tertiary hover:text-primary hover:bg-secondary/50 transition-colors"
                         onClick={() => isExpanded && setProductsDropdown(!productsDropdown)}
                       >
@@ -212,7 +205,9 @@ export function Navbar({ lang }: NavbarProps) {
                               exit={{ opacity: 0 }}
                               className="ml-auto"
                             >
-                              <HiChevronDown className={`w-4 h-4 transition-transform ${productsDropdown ? 'rotate-180' : ''}`} />
+                              <HiChevronDown
+                                className={`w-4 h-4 transition-transform ${productsDropdown ? "rotate-180" : ""}`}
+                              />
                             </motion.div>
                           )}
                         </AnimatePresence>
@@ -228,11 +223,11 @@ export function Navbar({ lang }: NavbarProps) {
                           >
                             {productCategories.map((category) => (
                               <Link
-                                key={category.slug}
-                                href={`/${lang}/productos/${category.slug}`}
+                                key={category.idname}
+                                href={`/${lang}/productos/${category.idname}`}
                                 className="block px-8 py-2 text-sm text-neutral hover:bg-secondary hover:text-primary transition-colors"
                               >
-                                {category.label}
+                                {category.name}
                               </Link>
                             ))}
                           </motion.div>
@@ -240,8 +235,8 @@ export function Navbar({ lang }: NavbarProps) {
                       </AnimatePresence>
                     </div>
                   ) : (
-                    <Link 
-                      href={item.href} 
+                    <Link
+                      href={item.href}
                       className="flex items-center px-4 py-3 text-tertiary hover:text-primary hover:bg-secondary/50 transition-colors"
                     >
                       <Icon className="w-5 h-5 flex-shrink-0" />
@@ -293,7 +288,7 @@ export function Navbar({ lang }: NavbarProps) {
                       exit={{ opacity: 0 }}
                       className="ml-auto"
                     >
-                      <HiChevronDown className={`w-4 h-4 transition-transform ${langDropdown ? 'rotate-180' : ''}`} />
+                      <HiChevronDown className={`w-4 h-4 transition-transform ${langDropdown ? "rotate-180" : ""}`} />
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -348,7 +343,12 @@ export function Navbar({ lang }: NavbarProps) {
               <div className="flex items-center justify-between p-4 border-b">
                 <Link href={`/${lang}`} className="flex items-center space-x-2">
                   <Image src={"/logo.png"} alt="Logo Arkitecnicos" width={40} height={40} />
-                  <span className="text-xl font-bold text-primary">Arkitécnicos</span>
+                  <span
+                    className="text-xl font-bold text-primary"
+                    style={{ fontFamily: "sans-serif", fontWeight: 700 }}
+                  >
+                    Arkitecnicos
+                  </span>
                 </Link>
                 <Button variant="ghost" size="sm" onClick={() => setIsMobileOpen(false)}>
                   <HiX className="w-6 h-6" />
@@ -373,12 +373,12 @@ export function Navbar({ lang }: NavbarProps) {
                         <div className="ml-8 space-y-1">
                           {productCategories.map((category) => (
                             <Link
-                              key={category.slug}
-                              href={`/${lang}/productos/${category.slug}`}
+                              key={category.idname}
+                              href={`/${lang}/productos/${category.idname}`}
                               className="block px-4 py-2 text-sm text-neutral hover:bg-gray-100 transition-colors"
                               onClick={() => setIsMobileOpen(false)}
                             >
-                              {category.label}
+                              {category.name}
                             </Link>
                           ))}
                         </div>

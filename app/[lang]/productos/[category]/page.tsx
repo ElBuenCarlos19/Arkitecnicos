@@ -1,79 +1,84 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { HiArrowRight, HiStar, HiArrowLeft } from "react-icons/hi"
+import { HiArrowRight, HiArrowLeft } from "react-icons/hi"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
-import { use } from "react"
-import { getProductsByCategory } from "@/lib/products"
-import { products } from "@/lib/products"
+import { use, useState, useEffect } from "react"
+import { getProductsByCategoryIdname } from "@/lib/db/products"
+import { getProductsCategoryByIdname } from "@/lib/db/products_category"
+import type { ProductWithCategoryName, ProductCategory } from "@/lib/types/product"
 
-const categoryData = {
-  "motores-puertas-abatibles": {
-    es: {
-      title: "Motores para Puertas Abatibles",
-      description: "Sistemas de automatización profesionales para puertas abatibles residenciales y comerciales",
-      products: [
-        {
-          name: "Motor Abatible Pro 400",
-          description: "Motor de alta potencia para puertas abatibles de hasta 400kg por hoja",
-          image: "/placeholder.svg?height=300&width=400&text=Motor+Pro+400",
-          features: ["Potencia 400W", "Control remoto incluido", "Sensores de seguridad", "Batería de respaldo"],
-          price: "Desde $1,200",
-          featured: true,
-        },
-        {
-          name: "Motor Abatible Eco 250",
-          description: "Solución económica para puertas residenciales de hasta 250kg por hoja",
-          image: "/placeholder.svg?height=300&width=400&text=Motor+Eco+250",
-          features: ["Potencia 250W", "Instalación sencilla", "Garantía 2 años", "Bajo consumo"],
-          price: "Desde $800",
-          featured: false,
-        },
-      ],
-    },
-    en: {
-      title: "Swing Gate Motors",
-      description: "Professional automation systems for residential and commercial swing gates",
-      products: [
-        {
-          name: "Swing Motor Pro 400",
-          description: "High-power motor for swing gates up to 400kg per leaf",
-          image: "/placeholder.svg?height=300&width=400&text=Motor+Pro+400",
-          features: ["400W Power", "Remote control included", "Safety sensors", "Battery backup"],
-          price: "From $1,200",
-          featured: true,
-        },
-        {
-          name: "Swing Motor Eco 250",
-          description: "Economic solution for residential gates up to 250kg per leaf",
-          image: "/placeholder.svg?height=300&width=400&text=Motor+Eco+250",
-          features: ["250W Power", "Easy installation", "2-year warranty", "Low consumption"],
-          price: "From $800",
-          featured: false,
-        },
-      ],
-    },
+const translations = {
+  es: {
+    backToProducts: "Volver a Productos",
+    viewDetails: "Ver Detalles",
+    loading: "Cargando productos...",
+    error: "Error al cargar productos",
+    noProducts: "No se encontraron productos en esta categoría",
+    categoryNotFound: "Categoría no encontrada",
   },
-  // Agregar más categorías aquí...
+  en: {
+    backToProducts: "Back to Products",
+    viewDetails: "View Details",
+    loading: "Loading products...",
+    error: "Error loading products",
+    noProducts: "No products found in this category",
+    categoryNotFound: "Category not found",
+  },
 }
 
 export default function CategoryPage({ params }: { params: Promise<{ lang: string; category: string }> }) {
   const { lang, category } = use(params)
-  const data = categoryData[category as keyof typeof categoryData]
-  const categoryProducts = getProductsByCategory(category)
-  const t = data?.[lang as keyof typeof data] || {
-    title: categoryProducts[0]?.category || "Categoría",
-    description: "Productos de automatización profesional",
-    products: categoryProducts,
-  }
+  const t = translations[lang as keyof typeof translations] || translations.es
 
-  if (!t) {
+  const [products, setProducts] = useState<ProductWithCategoryName[]>([])
+  const [categoryInfo, setCategoryInfo] = useState<ProductCategory | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const [productsData, categoryData] = await Promise.all([
+          getProductsByCategoryIdname(category),
+          getProductsCategoryByIdname(category),
+        ])
+
+        setProducts(productsData)
+        setCategoryInfo(categoryData)
+      } catch (err) {
+        console.error("Error loading data:", err)
+        setError(err instanceof Error ? err.message : "Error desconocido")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadData()
+  }, [category])
+
+  if (loading) {
     return (
       <div className="min-h-screen pt-20 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-tertiary mb-4">Categoría no encontrada</h1>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-neutral">{t.loading}</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !categoryInfo) {
+    return (
+      <div className="min-h-screen pt-20 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-tertiary mb-4">{t.categoryNotFound}</h1>
+          <p className="text-neutral mb-4">{error}</p>
           <Link href={`/${lang}/productos`}>
             <Button className="btn-primary">Volver a Productos</Button>
           </Link>
@@ -83,7 +88,7 @@ export default function CategoryPage({ params }: { params: Promise<{ lang: strin
   }
 
   return (
-    <div className="min-h-screen pt-20">
+    <div className="min-h-screen pt-20 pr-16">
       <div className="container-custom section-padding py-20">
         {/* Back Button */}
         <motion.div
@@ -95,7 +100,7 @@ export default function CategoryPage({ params }: { params: Promise<{ lang: strin
           <Link href={`/${lang}/productos`}>
             <Button variant="outline" className="group bg-transparent">
               <HiArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-              Volver a Productos
+              {t.backToProducts}
             </Button>
           </Link>
         </motion.div>
@@ -107,67 +112,77 @@ export default function CategoryPage({ params }: { params: Promise<{ lang: strin
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <h1 className="text-4xl md:text-5xl font-bold text-tertiary mb-4">{t.title}</h1>
-          <p className="text-xl text-neutral max-w-3xl mx-auto">{t.description}</p>
+          <h1 className="text-4xl md:text-5xl font-bold text-tertiary mb-4">{categoryInfo.name}</h1>
+          <p className="text-xl text-neutral max-w-3xl mx-auto">{categoryInfo.description}</p>
+
+          {/* Category Features */}
+          {categoryInfo.items && categoryInfo.items.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-2 mt-6">
+              {categoryInfo.items.map((item, index) => (
+                <span key={index} className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
+                  {item}
+                </span>
+              ))}
+            </div>
+          )}
         </motion.div>
 
         {/* Products Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {products.map((product, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: index * 0.1 }}
-              whileHover={{ y: -5 }}
-              className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group"
-            >
-              {/* Product Image */}
-              <div className="relative overflow-hidden">
-                <Image
-                  src={product.image || "/placeholder.svg"}
-                  alt={product.name}
-                  width={400}
-                  height={300}
-                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                {product.features && (
-                  <div className="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full text-sm font-medium flex items-center">
-                    <HiStar className="w-4 h-4 mr-1" />
-                    Destacado
-                  </div>
-                )}
-              </div>
-
-              {/* Product Content */}
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-tertiary mb-2">{product.name}</h3>
-                <p className="text-neutral text-sm mb-4 leading-relaxed">{product.description}</p>
-
-                {/* Features */}
-                <div className="space-y-2 mb-6">
-                  {product.features.map((feature, featureIndex) => (
-                    <div key={featureIndex} className="flex items-center text-sm text-neutral">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2" />
-                      {feature}
-                    </div>
-                  ))}
+        {products.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-neutral text-lg">{t.noProducts}</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {products.map((product, index) => (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: index * 0.1 }}
+                whileHover={{ y: -5 }}
+                className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group"
+              >
+                {/* Product Image */}
+                <div className="relative overflow-hidden">
+                  <Image
+                    src={product.images_url?.[0] || "/placeholder.svg?height=300&width=400&text=Producto"}
+                    alt={product.name}
+                    width={400}
+                    height={300}
+                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
                 </div>
 
-                {/* Price and CTA */}
-                <div className="flex items-center justify-between">
-                  <div className="text-lg font-bold text-primary">{product.price}</div>
-                  <Link href={`/${lang}/productos/producto/${product.id}`}>
-                    <Button size="sm" className="btn-primary group">
-                      Ver Detalles
+                {/* Product Content */}
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-tertiary mb-2">{product.name}</h3>
+                  <p className="text-neutral text-sm mb-4 leading-relaxed line-clamp-3">{product.description}</p>
+
+                  {/* Features */}
+                  {product.features && product.features.length > 0 && (
+                    <div className="space-y-2 mb-6">
+                      {product.features.slice(0, 3).map((feature, featureIndex) => (
+                        <div key={featureIndex} className="flex items-center text-sm text-neutral">
+                          <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2" />
+                          {feature}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* CTA */}
+                  <Link href={`/${lang}/productos/producto/${product.idname}`}>
+                    <Button className="w-full btn-primary group">
+                      {t.viewDetails}
                       <HiArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </Link>
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

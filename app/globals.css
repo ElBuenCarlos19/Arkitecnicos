@@ -1,6 +1,19 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@font-face {
+  font-family: 'Bauhaus 93';
+  src: url('/FontLogo.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+#letraArkitecnicos {
+  font-family: 'bauhaus 93', sans-serif;
+  text-decoration: underline;
+  color: var(--tertiary);
+}
+
 @layer base {
   :root {
     --primary: #cc232c;

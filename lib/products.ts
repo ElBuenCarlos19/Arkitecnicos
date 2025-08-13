@@ -8,7 +8,7 @@ export const products: Product[] = [
     description: "Motor de alta potencia para puertas abatibles de hasta 400kg por hoja",
     price: 1200,
     image: "/ejemplo1.jpg",
-    category: "motores-puertas-abatibles",
+    category: "Category 1",
     specifications: {
       Potencia: "400W",
       "Peso máximo por hoja": "400kg",

@@ -85,7 +85,7 @@ export function Footer({ lang }: FooterProps) {
   }
 
   return (
-    <footer className="bg-tertiary text-white">
+    <footer className="bg-tertiary text-white lg:pr-14">
       <div className="container-custom section-padding">
         {/* Main Footer Content */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 py-16">

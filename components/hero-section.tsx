@@ -11,6 +11,7 @@ const translations = {
   es: {
     title: "Arkitecnicos",
     subtitle: "WALL S.A.S",
+    innovation: "Innovación Tecnológica",
     description:
       "Transformamos procesos industriales con tecnología de vanguardia. Más de 15 años automatizando el éxito de nuestros clientes.",
     cta1: "Conocer Servicios",
@@ -20,7 +21,7 @@ const translations = {
       experience: "Años",
       clients: "Clientes",
     },
-    prevwords: 'Contamos con ',
+    prevwords: "Contamos con ",
     words: [
       "Puertas Abatibles",
       "Puertas de Garaje",
@@ -28,12 +29,13 @@ const translations = {
       "Cortinas Enrollables",
       "Puertas Peatonales",
       "Talanqueras",
-      "Cercados electricos"
-    ]
+      "Cercados electricos",
+    ],
   },
   en: {
     title: "Industrial Automation",
     subtitle: "of the Future",
+    innovation: "Innovative Technology",
     description:
       "We transform industrial processes with cutting-edge technology. Over 15 years automating our clients' success.",
     cta1: "Our Services",
@@ -43,7 +45,7 @@ const translations = {
       experience: "Years",
       clients: "Clients",
     },
-    prevwords: 'We have ',
+    prevwords: "We have ",
     words: [
       "Swing Doors",
       "Garage Doors",
@@ -51,8 +53,8 @@ const translations = {
       "Roller Blinds",
       "Pedestrian Doors",
       "Boom Barriers",
-      "Electric Barriers"
-    ]
+      "Electric Barriers",
+    ],
   },
 }
 
@@ -74,24 +76,19 @@ const animatedElements = [
 export function HeroSection({ lang }: HeroSectionProps) {
   const [mounted, setMounted] = useState(false)
   const t = translations[lang as keyof typeof translations] || translations.es
-  const [wordsindex, setWordsIndex] = useState(0)
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setWordsIndex(prev => (prev + 1) % t.words.length)
-    }, 2000)
-    return () => clearInterval(interval)
-  }, [])
-
   return (
-    <section id="inicio" className="relative min-h-screen flex items-center overflow-hidden py-10 px-4 sm:px-6">
+    <section
+      id="inicio"
+      className="relative min-h-screen flex items-center overflow-hidden py-10 px-4 sm:px-6 lg:pr-20"
+    >
       <div className="absolute inset-0 gradient-bg">
         <div className="absolute inset-0 bg-black/40" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#212529]/80 to-primary/40" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#212529]/80 to-[#212529]" />
       </div>
 
       {mounted && (
@@ -113,30 +110,68 @@ export function HeroSection({ lang }: HeroSectionProps) {
       )}
 
       <div className="container-custom section-padding relative z-10 w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           <div className="text-white grid grid-rows-6">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8 }}
+            >
+              <Image
+                src={"/logo.png"}
+                alt="Logo Arkitecnicos"
+                width={80}
+                height={80}
+                className="rounded-2xl row-span-1 mb-3"
+              />
+            </motion.div>
+
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="space-y-6 row-span-5 items-start flex flex-col justify-center"
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="space-y-4 sm:space-y-6 row-span-5 items-start flex flex-col justify-center"
             >
-              <div className="flex items-center space-x-2 text-accent">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="flex items-center space-x-2 text-accent"
+              >
                 <HiLightningBolt className="w-5 h-5" />
-                <span className="text-sm font-medium uppercase tracking-wider">Innovación Tecnológica</span>
-              </div>
+                <span className="text-sm font-medium uppercase tracking-wider">{t.innovation}</span>
+              </motion.div>
 
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                <span className="block">{t.title}</span>
-                <span className="block text-accent">{t.subtitle}</span>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight">
+                <motion.span
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.6 }}
+                  className="block"
+                >
+                  {t.title}
+                </motion.span>
+                <motion.span
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.8 }}
+                  className="block text-accent"
+                >
+                  {t.subtitle}
+                </motion.span>
               </h1>
 
               <TypewriterEffect t={t} />
 
-              <div className="flex flex-col sm:flex-row gap-4 pt-6">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 1.2 }}
+                className="flex flex-col sm:flex-row gap-4 pt-6 w-full"
+              >
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Link href={`/${lang}/servicios`}>
-                    <Button className="btn-primary group">
+                    <Button className="btn-primary group w-full sm:w-auto">
                       {t.cta1}
                       <HiArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Button>
@@ -147,20 +182,20 @@ export function HeroSection({ lang }: HeroSectionProps) {
                   <Link href={`/${lang}/productos`}>
                     <Button
                       variant="outline"
-                      className="border-white text-white hover:bg-white hover:text-black group bg-transparent"
+                      className="border-white text-white hover:bg-white hover:text-black group bg-transparent w-full sm:w-auto"
                     >
                       {t.cta2}
                       <HiArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </Link>
                 </motion.div>
-              </div>
+              </motion.div>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
+              transition={{ duration: 0.8, delay: 1.4 }}
               className="grid grid-cols-2 gap-4 pt-4 mt-6 border-t row-span-1 border-white/20"
             >
               {[
@@ -171,12 +206,12 @@ export function HeroSection({ lang }: HeroSectionProps) {
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    transition={{ duration: 0.5, delay: 0.6 + index * 0.1 }}
-                    className="text-3xl md:text-4xl font-bold text-accent"
+                    transition={{ duration: 0.5, delay: 1.6 + index * 0.1 }}
+                    className="text-2xl sm:text-3xl md:text-4xl font-bold text-accent"
                   >
                     {stat.number}
                   </motion.div>
-                  <div className="text-sm text-gray-300 mt-1">{stat.label}</div>
+                  <div className="text-xs sm:text-sm text-gray-300 mt-1">{stat.label}</div>
                 </div>
               ))}
             </motion.div>
@@ -200,9 +235,9 @@ export function HeroSection({ lang }: HeroSectionProps) {
               <motion.div
                 animate={{ y: [0, -5, 0] }}
                 transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
-                className="absolute -top-3 -right-4 bg-white rounded-full p-4 shadow-lg"
+                className="absolute -top-3 -right-4 bg-white rounded-full p-3 sm:p-4 shadow-lg"
               >
-                <HiShieldCheck className="w-8 h-8 text-primary" />
+                <HiShieldCheck className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
               </motion.div>
             </div>
           </motion.div>
@@ -212,11 +247,11 @@ export function HeroSection({ lang }: HeroSectionProps) {
   )
 }
 
-function TypewriterEffect({ t }: { t: (typeof translations)['es'] }) {
+function TypewriterEffect({ t }: { t: (typeof translations)["es"] }) {
   const [wordIndex, setWordIndex] = useState(0)
   const [charIndex, setCharIndex] = useState(0)
   const [isDeleting, setIsDeleting] = useState(false)
-  const [displayText, setDisplayText] = useState('')
+  const [displayText, setDisplayText] = useState("")
   const typingSpeed = isDeleting ? 50 : 100
   const pauseTime = 1000
 
@@ -245,13 +280,14 @@ function TypewriterEffect({ t }: { t: (typeof translations)['es'] }) {
   }, [charIndex, isDeleting, wordIndex, t.words])
 
   return (
-    <span className="inline-bloc text-white px-4 py-2 font-bold whitespace-nowrap text-lg leading-relaxed">
+    <motion.span
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8, delay: 1.0 }}
+      className="inline-block text-white px-4 py-2 font-bold whitespace-nowrap text-base sm:text-lg leading-relaxed"
+    >
       {t.prevwords}
-      {charIndex > 0 && (
-        <span className="border-r-2 border-white animate-blink ml-1">
-          {displayText}
-        </span>
-      )}
-    </span>
+      {charIndex > 0 && <span className="border-r-2 border-white animate-blink ml-1">{displayText}</span>}
+    </motion.span>
   )
 }

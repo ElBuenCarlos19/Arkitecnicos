@@ -60,7 +60,7 @@ export function ContactSection({ lang }: ContactSectionProps) {
   const t = translations[lang as keyof typeof translations] || translations.es
 
   return (
-    <section id="contacto" className="py-20 bg-tertiary text-white px-4 sm:px-6">
+    <section id="contacto" className="py-20 bg-tertiary text-white px-4 sm:px-6 lg:pr-20">
       <div className="container-custom section-padding">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

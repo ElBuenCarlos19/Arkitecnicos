@@ -5,8 +5,10 @@ import { HiArrowRight, HiArrowLeft, HiFilter } from "react-icons/hi"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
-import { use, useState } from "react"
-import { products, getAllCategories } from "@/lib/products"
+import { use, useState, useEffect } from "react"
+import { getAllProductsCategory } from "@/lib/db/products_category"
+import { getProductsWithCategoryName } from "@/lib/db/products"
+import type { ProductCategory, ProductWithCategoryName } from "@/lib/types/product"
 
 const translations = {
   es: {
@@ -16,14 +18,9 @@ const translations = {
     allCategories: "Todas las Categorías",
     filterBy: "Filtrar por:",
     productsFound: "productos encontrados",
-    categories: {
-      "motores-puertas-abatibles": "Motores para Puertas Abatibles",
-      "motores-puertas-garaje": "Motores para Puertas de Garaje",
-      "motores-puertas-corredizas": "Motores para Puertas Corredizas",
-      "motores-cortinas-enrollables": "Motores para Cortinas Enrollables",
-      "motores-puertas-peatonales": "Motores para Puertas Peatonales",
-      talanqueras: "Talanqueras",
-    },
+    loading: "Cargando productos...",
+    error: "Error al cargar productos",
+    noProducts: "No se encontraron productos",
   },
   en: {
     title: "Complete Catalog",
@@ -32,14 +29,9 @@ const translations = {
     allCategories: "All Categories",
     filterBy: "Filter by:",
     productsFound: "products found",
-    categories: {
-      "motores-puertas-abatibles": "Swing Gate Motors",
-      "motores-puertas-garaje": "Garage Door Motors",
-      "motores-puertas-corredizas": "Sliding Gate Motors",
-      "motores-cortinas-enrollables": "Rolling Shutter Motors",
-      "motores-puertas-peatonales": "Pedestrian Door Motors",
-      talanqueras: "Barrier Gates",
-    },
+    loading: "Loading products...",
+    error: "Error loading products",
+    noProducts: "No products found",
   },
 }
 
@@ -48,10 +40,65 @@ export default function CatalogPage({ params }: { params: Promise<{ lang: string
   const t = translations[lang as keyof typeof translations] || translations.es
 
   const [selectedCategory, setSelectedCategory] = useState<string>("all")
-  const categories = getAllCategories()
+  const [categories, setCategories] = useState<ProductCategory[]>([])
+  const [products, setProducts] = useState<ProductWithCategoryName[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const filteredProducts =
-    selectedCategory === "all" ? products : products.filter((product) => product.category === selectedCategory)
+    selectedCategory === "all"
+      ? products
+      : products.filter((product) => product.products_category?.idname === selectedCategory)
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const [categoriesData, productsData] = await Promise.all([
+          getAllProductsCategory(),
+          getProductsWithCategoryName(),
+        ])
+
+        setCategories(categoriesData)
+        setProducts(productsData)
+      } catch (err) {
+        console.error("Error loading data:", err)
+        setError(err instanceof Error ? err.message : "Error desconocido")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadData()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-20 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-neutral">{t.loading}</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen pt-20 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">
+            {t.error}: {error}
+          </p>
+          <Button onClick={() => window.location.reload()} className="btn-primary">
+            Reintentar
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen pt-20">
@@ -107,13 +154,13 @@ export default function CatalogPage({ params }: { params: Promise<{ lang: string
 
               {categories.map((category) => (
                 <Button
-                  key={category}
-                  variant={selectedCategory === category ? "default" : "outline"}
+                  key={category.idname}
+                  variant={selectedCategory === category.idname ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setSelectedCategory(category)}
-                  className={selectedCategory === category ? "btn-primary" : ""}
+                  onClick={() => setSelectedCategory(category.idname)}
+                  className={selectedCategory === category.idname ? "btn-primary" : ""}
                 >
-                  {t.categories[category as keyof typeof t.categories]}
+                  {category.name}
                 </Button>
               ))}
             </div>
@@ -125,58 +172,69 @@ export default function CatalogPage({ params }: { params: Promise<{ lang: string
         </motion.div>
 
         {/* Products Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredProducts.map((product, index) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: index * 0.05 }}
-              whileHover={{ y: -5 }}
-              className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group"
-            >
-              {/* Product Image */}
-              <div className="relative overflow-hidden">
-                <Image
-                  src={product.image || "/placeholder.svg"}
-                  alt={product.name}
-                  width={300}
-                  height={200}
-                  className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-
-              {/* Product Content */}
-              <div className="p-4">
-                <h3 className="text-lg font-bold text-tertiary mb-2 line-clamp-1">{product.name}</h3>
-                <p className="text-neutral text-sm mb-3 leading-relaxed line-clamp-2">{product.description}</p>
-
-                {/* Key Features */}
-                <div className="space-y-1 mb-4">
-                  {product.features.slice(0, 2).map((feature, featureIndex) => (
-                    <div key={featureIndex} className="flex items-center text-xs text-neutral">
-                      <div className="w-1 h-1 bg-primary rounded-full mr-2" />
-                      {feature}
+        {filteredProducts.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-neutral text-lg">{t.noProducts}</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredProducts.map((product, index) => (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: index * 0.05 }}
+                whileHover={{ y: -5 }}
+                className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group"
+              >
+                {/* Product Image */}
+                <div className="relative overflow-hidden">
+                  <Image
+                    src={product.images_url?.[0] || "/placeholder.svg?height=200&width=300&text=Producto"}
+                    alt={product.name}
+                    width={300}
+                    height={200}
+                    className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  {product.products_category && (
+                    <div className="absolute top-2 left-2 bg-primary/90 text-white px-2 py-1 rounded-full text-xs">
+                      {product.products_category.name}
                     </div>
-                  ))}
+                  )}
                 </div>
 
-                {/* Price and CTA */}
-                <div className="flex items-center justify-between">
-                  <div className="text-lg font-bold text-primary">${product.price.toLocaleString()}</div>
-                  <Link href={`/${lang}/productos/producto/${product.id}`}>
-                    <Button size="sm" className="btn-primary group text-xs px-3 py-1">
-                      {t.viewDetails}
-                      <HiArrowRight className="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </Link>
+                {/* Product Content */}
+                <div className="p-4">
+                  <h3 className="text-lg font-bold text-tertiary mb-2 line-clamp-1">{product.name}</h3>
+                  <p className="text-neutral text-sm mb-3 leading-relaxed line-clamp-2">{product.description}</p>
+
+                  {/* Key Features */}
+                  {product.features && product.features.length > 0 && (
+                    <div className="space-y-1 mb-4">
+                      {product.features.slice(0, 2).map((feature: string, featureIndex: number) => (
+                        <div key={featureIndex} className="flex items-center text-xs text-neutral">
+                          <div className="w-1 h-1 bg-primary rounded-full mr-2" />
+                          {feature}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* CTA */}
+                  <div className="flex items-center justify-between">
+                    <Link href={`/${lang}/productos/producto/${product.idname}`}>
+                      <Button size="sm" className="btn-primary group text-xs px-3 py-1">
+                        {t.viewDetails}
+                        <HiArrowRight className="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
 }
- 

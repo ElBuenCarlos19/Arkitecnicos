@@ -5,6 +5,9 @@ import { HiArrowRight, HiCalendar, HiLocationMarker, HiUsers } from "react-icons
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
+import { useState, useEffect } from "react"
+import { getWorks } from "@/lib/db/works"
+import type { Work } from "@/lib/types/product"
 
 const translations = {
   es: {
@@ -12,112 +15,16 @@ const translations = {
     subtitle: "Casos de Éxito y Proyectos Realizados",
     viewWork: "Ver Trabajo",
     viewAll: "Ver Todos los Trabajos",
-    works: [
-      {
-        id: "automatizacion-linea-automotriz",
-        title: "Automatización Línea de Producción Automotriz",
-        client: "AutoTech Industries",
-        location: "México, CDMX",
-        date: "2024",
-        description:
-          "Implementación completa de sistema automatizado para línea de ensamble de vehículos, incluyendo robots colaborativos y sistema de control centralizado.",
-        image: "/placeholder.svg?height=400&width=600&text=Línea+Automotriz",
-        tags: ["Robótica", "PLC", "SCADA", "Industria 4.0"],
-        results: ["40% aumento en productividad", "60% reducción de errores", "25% ahorro energético"],
-      },
-      {
-        id: "sistema-control-planta-quimica",
-        title: "Sistema de Control para Planta Química",
-        client: "ChemPro Solutions",
-        location: "Guadalajara, JAL",
-        date: "2023",
-        description:
-          "Desarrollo e instalación de sistema de control distribuido para planta de procesamiento químico con monitoreo en tiempo real.",
-        image: "/placeholder.svg?height=400&width=600&text=Planta+Química",
-        tags: ["DCS", "Seguridad", "Monitoreo", "Proceso Químico"],
-        results: ["99.8% uptime del sistema", "30% mejora en eficiencia", "Certificación ISO 9001"],
-      },
-      {
-        id: "modernizacion-sistema-electrico",
-        title: "Modernización de Sistema Eléctrico Industrial",
-        client: "PowerGrid Corp",
-        location: "Monterrey, NL",
-        date: "2023",
-        description:
-          "Actualización completa del sistema eléctrico industrial incluyendo tableros de control, protecciones y sistema de monitoreo energético.",
-        image: "/placeholder.svg?height=400&width=600&text=Sistema+Eléctrico",
-        tags: ["Sistemas Eléctricos", "Protecciones", "Eficiencia Energética"],
-        results: ["20% reducción en consumo", "Cero fallas eléctricas", "ROI en 18 meses"],
-      },
-      {
-        id: "automatizacion-almacen-inteligente",
-        title: "Automatización de Almacén Inteligente",
-        client: "LogiSmart Warehouse",
-        location: "Tijuana, BC",
-        date: "2024",
-        description:
-          "Implementación de sistema automatizado de almacenamiento y recuperación con AGVs y software de gestión de inventario.",
-        image: "/placeholder.svg?height=400&width=600&text=Almacén+Inteligente",
-        tags: ["AGV", "WMS", "IoT", "Logística"],
-        results: ["50% reducción en tiempos", "95% precisión inventario", "35% ahorro operativo"],
-      },
-    ],
+    loading: "Cargando trabajos...",
+    keyResults: "Resultados Clave:",
   },
   en: {
     title: "Our Works",
     subtitle: "Success Stories and Completed Projects",
     viewWork: "View Work",
     viewAll: "View All Works",
-    works: [
-      {
-        id: "automotive-line-automation",
-        title: "Automotive Production Line Automation",
-        client: "AutoTech Industries",
-        location: "Mexico City, CDMX",
-        date: "2024",
-        description:
-          "Complete implementation of automated system for vehicle assembly line, including collaborative robots and centralized control system.",
-        image: "/placeholder.svg?height=400&width=600&text=Automotive+Line",
-        tags: ["Robotics", "PLC", "SCADA", "Industry 4.0"],
-        results: ["40% productivity increase", "60% error reduction", "25% energy savings"],
-      },
-      {
-        id: "chemical-plant-control-system",
-        title: "Control System for Chemical Plant",
-        client: "ChemPro Solutions",
-        location: "Guadalajara, JAL",
-        date: "2023",
-        description:
-          "Development and installation of distributed control system for chemical processing plant with real-time monitoring.",
-        image: "/placeholder.svg?height=400&width=600&text=Chemical+Plant",
-        tags: ["DCS", "Safety", "Monitoring", "Chemical Process"],
-        results: ["99.8% system uptime", "30% efficiency improvement", "ISO 9001 certification"],
-      },
-      {
-        id: "electrical-system-modernization",
-        title: "Industrial Electrical System Modernization",
-        client: "PowerGrid Corp",
-        location: "Monterrey, NL",
-        date: "2023",
-        description:
-          "Complete upgrade of industrial electrical system including control panels, protections and energy monitoring system.",
-        image: "/placeholder.svg?height=400&width=600&text=Electrical+System",
-        tags: ["Electrical Systems", "Protections", "Energy Efficiency"],
-        results: ["20% consumption reduction", "Zero electrical failures", "ROI in 18 months"],
-      },
-      {
-        id: "smart-warehouse-automation",
-        title: "Smart Warehouse Automation",
-        client: "LogiSmart Warehouse",
-        location: "Tijuana, BC",
-        date: "2024",
-        description:
-          "Implementation of automated storage and retrieval system with AGVs and inventory management software.",
-        image: "/placeholder.svg?height=400&width=600&text=Smart+Warehouse",
-        tags: ["AGV", "WMS", "IoT", "Logistics"],
-        results: ["50% time reduction", "95% inventory accuracy", "35% operational savings"],
-      },
-    ],
+    loading: "Loading works...",
+    keyResults: "Key Results:",
   },
 }
 
@@ -127,9 +34,38 @@ interface WorksSectionProps {
 
 export function WorksSection({ lang }: WorksSectionProps) {
   const t = translations[lang as keyof typeof translations] || translations.es
+  const [works, setWorks] = useState<Work[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const loadWorks = async () => {
+      try {
+        const data = await getWorks()
+        setWorks(data.slice(0, 4)) // Mostrar solo los primeros 4 trabajos
+      } catch (error) {
+        console.error("Error loading works:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadWorks()
+  }, [])
+
+  if (loading) {
+    return (
+      <section id="trabajos" className="py-20 bg-white lg:pr-20">
+        <div className="container-custom section-padding">
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   return (
-    <section id="trabajos" className="py-20 bg-white">
+    <section id="trabajos" className="py-20 bg-white lg:pr-20">
       <div className="container-custom section-padding">
         {/* Header */}
         <motion.div
@@ -139,84 +75,95 @@ export function WorksSection({ lang }: WorksSectionProps) {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-tertiary mb-4">{t.title}</h2>
-          <p className="text-xl text-neutral max-w-3xl mx-auto">{t.subtitle}</p>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-tertiary mb-4">{t.title}</h2>
+          <p className="text-lg sm:text-xl text-neutral max-w-3xl mx-auto">{t.subtitle}</p>
         </motion.div>
 
         {/* Works Grid */}
-        <div className="grid lg:grid-cols-2 gap-8 mb-12">
-          {t.works.map((work, index) => (
+        <div className="grid sm:grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-12">
+          {works.map((work, index) => (
             <motion.div
               key={work.id}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: index * 0.1 }}
               viewport={{ once: true }}
-              whileHover={{ y: -5 }}
+              whileHover={{ y: -5, scale: 1.02 }}
               className="bg-secondary rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group"
             >
               {/* Work Image */}
               <div className="relative overflow-hidden">
                 <Image
-                  src={work.image || "/placeholder.svg"}
-                  alt={work.title}
+                  src={work.image_urls?.[0] || "/placeholder.svg?height=300&width=600&text=Trabajo"}
+                  alt={work.name}
                   width={600}
-                  height={400}
-                  className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+                  height={300}
+                  className="w-full h-48 sm:h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                 <div className="absolute bottom-4 left-4 right-4">
                   <div className="flex flex-wrap gap-2">
                     {work.tags.map((tag, tagIndex) => (
-                      <span
+                      <motion.span
                         key={tagIndex}
-                        className="bg-white/20 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: tagIndex * 0.1 }}
+                        className="bg-white/20 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs font-medium"
                       >
                         {tag}
-                      </span>
+                      </motion.span>
                     ))}
                   </div>
                 </div>
               </div>
 
               {/* Work Content */}
-              <div className="p-6">
-                <div className="flex items-center gap-4 text-sm text-neutral mb-3">
+              <div className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-neutral mb-3">
                   <div className="flex items-center">
-                    <HiCalendar className="w-4 h-4 mr-1" />
-                    {work.date}
+                    <HiCalendar className="w-4 h-4 mr-1 flex-shrink-0" />
+                    <span>{work.date}</span>
                   </div>
                   <div className="flex items-center">
-                    <HiLocationMarker className="w-4 h-4 mr-1" />
-                    {work.location}
+                    <HiLocationMarker className="w-4 h-4 mr-1 flex-shrink-0" />
+                    <span className="truncate">{work.location}</span>
                   </div>
                 </div>
 
-                <h3 className="text-xl font-bold text-tertiary mb-2">{work.title}</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-tertiary mb-2 line-clamp-2">{work.name}</h3>
 
                 <div className="flex items-center text-sm text-primary mb-3">
-                  <HiUsers className="w-4 h-4 mr-1" />
-                  {work.client}
+                  <HiUsers className="w-4 h-4 mr-1 flex-shrink-0" />
+                  <span className="truncate">{work.client}</span>
                 </div>
 
-                <p className="text-neutral text-sm mb-4 leading-relaxed">{work.description}</p>
+                <p className="text-neutral text-sm mb-4 leading-relaxed line-clamp-3">{work.description}</p>
 
                 {/* Results */}
                 <div className="space-y-2 mb-6">
-                  <h4 className="font-semibold text-tertiary text-sm">Resultados Clave:</h4>
-                  {work.results.map((result, resultIndex) => (
-                    <div key={resultIndex} className="flex items-center text-sm text-neutral">
-                      <div className="w-1.5 h-1.5 bg-success rounded-full mr-2" />
-                      {result}
-                    </div>
+                  <h4 className="font-semibold text-tertiary text-sm">{t.keyResults}</h4>
+                  {work.results.slice(0, 3).map((result, resultIndex) => (
+                    <motion.div
+                      key={resultIndex}
+                      initial={{ opacity: 0, x: -10 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      transition={{ delay: resultIndex * 0.1 }}
+                      className="flex items-center text-sm text-neutral"
+                    >
+                      <div className="w-1.5 h-1.5 bg-success rounded-full mr-2 flex-shrink-0" />
+                      <span className="line-clamp-1">{result}</span>
+                    </motion.div>
                   ))}
                 </div>
 
-                <Link href={`/${lang}/trabajos/${work.id}`}>
-                  <Button className="w-full btn-primary group">
-                    {t.viewWork}
-                    <HiArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                  </Button>
+                <Link href={`/${lang}/trabajos/${work.idname}`}>
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Button className="w-full btn-primary group">
+                      {t.viewWork}
+                      <HiArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </motion.div>
                 </Link>
               </div>
             </motion.div>
@@ -232,10 +179,12 @@ export function WorksSection({ lang }: WorksSectionProps) {
           className="text-center"
         >
           <Link href={`/${lang}/trabajos`}>
-            <Button className="btn-primary group">
-              {t.viewAll}
-              <HiArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Button>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button className="btn-primary group">
+                {t.viewAll}
+                <HiArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </motion.div>
           </Link>
         </motion.div>
       </div>

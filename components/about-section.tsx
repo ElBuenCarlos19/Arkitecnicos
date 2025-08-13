@@ -66,7 +66,7 @@ export function AboutSection({ lang }: AboutSectionProps) {
   const t = translations[lang as keyof typeof translations] || translations.es
 
   return (
-    <section id="nosotros" className="py-20 bg-secondary">
+    <section id="nosotros" className="py-20 bg-secondary lg:pr-20">
       <div className="container-custom section-padding">
         {/* Header */}
         <motion.div

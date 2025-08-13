@@ -3,30 +3,29 @@
 import { create } from "zustand"
 import { persist, createJSONStorage } from "zustand/middleware"
 
-export interface Product {
-  id: string
+export interface CartProduct {
+  id: number
+  idname: string
   name: string
   description: string
-  price: number
-  image: string
-  category: string
-  specifications: Record<string, string>
+  images_url: string[]
+  category: number
+  specifications: Record<string, any>
   features: string[]
 }
 
-export interface CartItem extends Product {
+export interface CartItem extends CartProduct {
   quantity: number
 }
 
 interface CartStore {
   items: CartItem[]
   isHydrated: boolean
-  addItem: (product: Product) => void
-  removeItem: (productId: string) => void
-  updateQuantity: (productId: string, quantity: number) => void
+  addItem: (product: CartProduct) => void
+  removeItem: (productId: number) => void
+  updateQuantity: (productId: number, quantity: number) => void
   clearCart: () => void
   getTotalItems: () => number
-  getTotalPrice: () => number
   setHydrated: () => void
 }
 
@@ -67,9 +66,6 @@ export const useCart = create<CartStore>()(
       clearCart: () => set({ items: [] }),
       getTotalItems: () => {
         return get().items.reduce((total, item) => total + item.quantity, 0)
-      },
-      getTotalPrice: () => {
-        return get().items.reduce((total, item) => total + item.price * item.quantity, 0)
       },
       setHydrated: () => set({ isHydrated: true }),
     }),

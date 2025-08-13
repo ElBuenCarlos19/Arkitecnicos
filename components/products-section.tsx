@@ -5,7 +5,9 @@ import { HiArrowRight } from "react-icons/hi"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
-import { products } from "@/lib/products"
+import { useState, useEffect } from "react"
+import { getProductsWithCategoryName } from "@/lib/db/products"
+import type { ProductWithCategoryName } from "@/lib/types/product"
 
 const translations = {
   es: {
@@ -15,6 +17,7 @@ const translations = {
     viewCategories: "Ver Categorías",
     viewProducts: "Ver Productos",
     featured: "Destacado",
+    loading: "Cargando productos...",
   },
   en: {
     title: "Our Products",
@@ -23,6 +26,7 @@ const translations = {
     viewCategories: "View Categories",
     viewProducts: "View Products",
     featured: "Featured",
+    loading: "Loading products...",
   },
 }
 
@@ -32,12 +36,26 @@ interface ProductsSectionProps {
 
 export function ProductsSection({ lang }: ProductsSectionProps) {
   const t = translations[lang as keyof typeof translations] || translations.es
+  const [products, setProducts] = useState<ProductWithCategoryName[]>([])
+  const [loading, setLoading] = useState(true)
 
-  // Mostrar solo los primeros 6 productos destacados
-  const featuredProducts = products.slice(0, 6)
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const data = await getProductsWithCategoryName()
+        setProducts(data.slice(0, 6)) // Mostrar solo los primeros 6 productos
+      } catch (error) {
+        console.error("Error loading products:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadProducts()
+  }, [])
 
   return (
-    <section id="productos" className="py-20 bg-secondary">
+    <section id="productos" className="py-20 bg-secondary lg:pr-20">
       <div className="container-custom section-padding">
         {/* Header */}
         <motion.div
@@ -71,62 +89,70 @@ export function ProductsSection({ lang }: ProductsSectionProps) {
         </motion.div>
 
         {/* Featured Products Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {featuredProducts.map((product, index) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: index * 0.1 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -5 }}
-              className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group"
-            >
-              {/* Product Image */}
-              <div className="relative overflow-hidden">
-                <Image
-                  src={product.image || "/placeholder.svg"}
-                  alt={product.name}
-                  width={400}
-                  height={300}
-                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                {index < 3 && (
-                  <div className="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full text-sm font-medium">
-                    {t.featured}
-                  </div>
-                )}
-              </div>
-
-              {/* Product Content */}
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-tertiary mb-2">{product.name}</h3>
-                <p className="text-neutral text-sm mb-4 leading-relaxed line-clamp-2">{product.description}</p>
-
-                {/* Features */}
-                <div className="space-y-2 mb-6">
-                  {product.features.slice(0, 3).map((feature, featureIndex) => (
-                    <div key={featureIndex} className="flex items-center text-sm text-neutral">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2" />
-                      {feature}
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {products.map((product, index) => (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -5 }}
+                className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group"
+              >
+                {/* Product Image */}
+                <div className="relative overflow-hidden">
+                  <Image
+                    src={product.images_url?.[0] || "/placeholder.svg?height=300&width=400&text=Producto"}
+                    alt={product.name}
+                    width={400}
+                    height={300}
+                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  {index < 3 && (
+                    <div className="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full text-sm font-medium">
+                      {t.featured}
                     </div>
-                  ))}
+                  )}
                 </div>
 
-                {/* Price and CTA */}
-                <div className="flex items-center justify-between">
-                  <div className="text-lg font-bold text-primary">${product.price.toLocaleString()}</div>
-                  <Link href={`/${lang}/productos/producto/${product.id}`}>
-                    <Button size="sm" className="btn-primary group">
-                      {t.viewDetails}
-                      <HiArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </Link>
+                {/* Product Content */}
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-tertiary mb-2">{product.name}</h3>
+                  <p className="text-neutral text-sm mb-4 leading-relaxed line-clamp-2">{product.description}</p>
+
+                  {/* Features */}
+                  {product.features && product.features.length > 0 && (
+                    <div className="space-y-2 mb-6">
+                      {product.features.slice(0, 3).map((feature, featureIndex) => (
+                        <div key={featureIndex} className="flex items-center text-sm text-neutral">
+                          <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2" />
+                          {feature}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* CTA */}
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-primary font-medium">{product.products_category?.name}</div>
+                    <Link href={`/${lang}/productos/producto/${product.idname}`}>
+                      <Button size="sm" className="btn-primary group">
+                        {t.viewDetails}
+                        <HiArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )

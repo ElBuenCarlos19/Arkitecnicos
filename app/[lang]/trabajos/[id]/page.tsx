@@ -5,73 +5,83 @@ import { HiArrowLeft, HiCalendar, HiLocationMarker, HiUsers, HiCheckCircle } fro
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
-import { use } from "react"
+import { use, useState, useEffect } from "react"
+import { getWorkByIdname } from "@/lib/db/works"
+import type { Work } from "@/lib/types/product"
 
-const worksData = {
-  "automatizacion-linea-automotriz": {
-    es: {
-      title: "Automatización Línea de Producción Automotriz",
-      client: "AutoTech Industries",
-      location: "México, CDMX",
-      date: "2024",
-      duration: "8 meses",
-      description:
-        "Implementación completa de sistema automatizado para línea de ensamble de vehículos, incluyendo robots colaborativos y sistema de control centralizado que revolucionó la producción de la planta.",
-      challenge:
-        "La planta de AutoTech Industries enfrentaba problemas de eficiencia en su línea de producción, con altos tiempos de ciclo y errores frecuentes que afectaban la calidad del producto final.",
-      solution:
-        "Diseñamos e implementamos un sistema integral de automatización que incluye robots colaborativos, sistemas de visión artificial, control PLC centralizado y monitoreo en tiempo real.",
-      images: [
-        "/placeholder.svg?height=400&width=600&text=Línea+Automatizada",
-        "/placeholder.svg?height=400&width=600&text=Robots+Colaborativos",
-        "/placeholder.svg?height=400&width=600&text=Sistema+Control",
-      ],
-      technologies: ["Robótica Colaborativa", "PLC Siemens", "SCADA", "Visión Artificial", "Industria 4.0"],
-      results: [
-        "40% aumento en productividad",
-        "60% reducción de errores",
-        "25% ahorro energético",
-        "ROI alcanzado en 14 meses",
-        "Certificación ISO 9001",
-      ],
-      phases: [
-        {
-          title: "Análisis y Diseño",
-          description: "Evaluación completa de la línea existente y diseño del nuevo sistema",
-          duration: "2 meses",
-        },
-        {
-          title: "Implementación",
-          description: "Instalación de equipos y programación de sistemas",
-          duration: "4 meses",
-        },
-        {
-          title: "Pruebas y Optimización",
-          description: "Pruebas exhaustivas y optimización del sistema",
-          duration: "1.5 meses",
-        },
-        {
-          title: "Capacitación y Entrega",
-          description: "Capacitación del personal y entrega oficial del proyecto",
-          duration: "0.5 meses",
-        },
-      ],
-    },
+const translations = {
+  es: {
+    backToWorks: "Volver a Trabajos",
+    challenge: "El Desafío",
+    solution: "La Solución",
+    results: "Resultados Obtenidos",
+    technologies: "Tecnologías Utilizadas",
+    contactCTA: "¿Tienes un proyecto similar?",
+    contactDescription: "Contáctanos para discutir cómo podemos ayudarte a automatizar tus procesos.",
+    contactNow: "Contactar Ahora",
+    workNotFound: "Trabajo no encontrado",
+    loading: "Cargando trabajo...",
+    error: "Error al cargar trabajo",
   },
-  // Agregar más trabajos aquí...
+  en: {
+    backToWorks: "Back to Works",
+    challenge: "The Challenge",
+    solution: "The Solution",
+    results: "Results Achieved",
+    technologies: "Technologies Used",
+    contactCTA: "Do you have a similar project?",
+    contactDescription: "Contact us to discuss how we can help you automate your processes.",
+    contactNow: "Contact Now",
+    workNotFound: "Work not found",
+    loading: "Loading work...",
+    error: "Error loading work",
+  },
 }
 
 export default function WorkDetailPage({ params }: { params: Promise<{ lang: string; id: string }> }) {
   const { lang, id } = use(params)
-  const work = worksData[id as keyof typeof worksData]
-  const t = work?.[lang as keyof typeof work] || work?.es
+  const t = translations[lang as keyof typeof translations] || translations.es
 
-  if (!t) {
+  const [work, setWork] = useState<Work | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const loadWork = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const workData = await getWorkByIdname(id)
+        setWork(workData)
+      } catch (err) {
+        console.error("Error loading work:", err)
+        setError(err instanceof Error ? err.message : "Error desconocido")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadWork()
+  }, [id])
+
+  if (loading) {
     return (
-      <div className="min-h-screen pt-20 flex items-center justify-center">
+      <div className="min-h-screen pt-20 flex items-center justify-center px-4">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-tertiary mb-4">Trabajo no encontrado</h1>
-          <Link href={`/${lang}#trabajos`}>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-neutral">{t.loading}</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !work) {
+    return (
+      <div className="min-h-screen pt-20 flex items-center justify-center px-4">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-tertiary mb-4">{t.workNotFound}</h1>
+          <p className="text-neutral mb-4">{error}</p>
+          <Link href={`/${lang}/trabajos`}>
             <Button className="btn-primary">Volver a Trabajos</Button>
           </Link>
         </div>
@@ -80,8 +90,8 @@ export default function WorkDetailPage({ params }: { params: Promise<{ lang: str
   }
 
   return (
-    <div className="min-h-screen pt-20">
-      <div className="container-custom section-padding py-20">
+    <div className="min-h-screen pt-20 px-4 sm:px-6 lg:pr-20">
+      <div className="container-custom section-padding py-12 sm:py-20">
         {/* Back Button */}
         <motion.div
           initial={{ opacity: 0, x: -30 }}
@@ -89,10 +99,10 @@ export default function WorkDetailPage({ params }: { params: Promise<{ lang: str
           transition={{ duration: 0.8 }}
           className="mb-8"
         >
-          <Link href={`/${lang}#trabajos`}>
+          <Link href={`/${lang}/trabajos`}>
             <Button variant="outline" className="group bg-transparent">
               <HiArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-              Volver a Trabajos
+              {t.backToWorks}
             </Button>
           </Link>
         </motion.div>
@@ -102,26 +112,28 @@ export default function WorkDetailPage({ params }: { params: Promise<{ lang: str
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="mb-12"
+          className="mb-8 sm:mb-12"
         >
-          <h1 className="text-4xl md:text-5xl font-bold text-tertiary mb-6">{t.title}</h1>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-tertiary mb-4 sm:mb-6">
+            {work.name}
+          </h1>
 
-          <div className="flex flex-wrap gap-6 text-neutral mb-6">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4 sm:gap-6 text-neutral mb-4 sm:mb-6">
             <div className="flex items-center">
-              <HiUsers className="w-5 h-5 mr-2 text-primary" />
-              {t.client}
+              <HiUsers className="w-5 h-5 mr-2 text-primary flex-shrink-0" />
+              <span className="truncate">{work.client}</span>
             </div>
             <div className="flex items-center">
-              <HiLocationMarker className="w-5 h-5 mr-2 text-primary" />
-              {t.location}
+              <HiLocationMarker className="w-5 h-5 mr-2 text-primary flex-shrink-0" />
+              <span className="truncate">{work.location}</span>
             </div>
             <div className="flex items-center">
-              <HiCalendar className="w-5 h-5 mr-2 text-primary" />
-              {t.date} • {t.duration}
+              <HiCalendar className="w-5 h-5 mr-2 text-primary flex-shrink-0" />
+              <span>{work.date}</span>
             </div>
           </div>
 
-          <p className="text-lg text-neutral leading-relaxed max-w-4xl">{t.description}</p>
+          <p className="text-base sm:text-lg text-neutral leading-relaxed max-w-4xl">{work.description}</p>
         </motion.div>
 
         {/* Main Image */}
@@ -129,28 +141,31 @@ export default function WorkDetailPage({ params }: { params: Promise<{ lang: str
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="mb-16"
+          className="mb-12 sm:mb-16"
         >
           <Image
-            src={t.images[0] || "/placeholder.svg"}
-            alt={t.title}
+            src={work.image_urls?.[0] || "/placeholder.svg?height=600&width=1200&text=Trabajo"}
+            alt={work.name}
             width={1200}
             height={600}
-            className="w-full h-96 object-cover rounded-2xl shadow-lg"
+            className="w-full h-64 sm:h-80 md:h-96 object-cover rounded-2xl shadow-lg"
           />
         </motion.div>
 
-        <div className="grid lg:grid-cols-3 gap-12">
+        <div className="grid lg:grid-cols-3 gap-8 sm:gap-12">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-12">
+          <div className="lg:col-span-2 space-y-8 sm:space-y-12">
             {/* Challenge */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
             >
-              <h2 className="text-2xl font-bold text-tertiary mb-4">El Desafío</h2>
-              <p className="text-neutral leading-relaxed">{t.challenge}</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-tertiary mb-4">{t.challenge}</h2>
+              <p className="text-neutral leading-relaxed">
+                Este proyecto presentó desafíos únicos que requirieron soluciones innovadoras y un enfoque personalizado
+                para cumplir con los objetivos del cliente.
+              </p>
             </motion.div>
 
             {/* Solution */}
@@ -159,68 +174,57 @@ export default function WorkDetailPage({ params }: { params: Promise<{ lang: str
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              <h2 className="text-2xl font-bold text-tertiary mb-4">La Solución</h2>
-              <p className="text-neutral leading-relaxed">{t.solution}</p>
-            </motion.div>
-
-            {/* Project Phases */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
-            >
-              <h2 className="text-2xl font-bold text-tertiary mb-6">Fases del Proyecto</h2>
-              <div className="space-y-4">
-                {t.phases.map((phase, index) => (
-                  <div key={index} className="bg-secondary p-6 rounded-xl">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold text-tertiary">{phase.title}</h3>
-                      <span className="text-sm text-primary font-medium">{phase.duration}</span>
-                    </div>
-                    <p className="text-neutral text-sm">{phase.description}</p>
-                  </div>
-                ))}
-              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-tertiary mb-4">{t.solution}</h2>
+              <p className="text-neutral leading-relaxed">
+                Implementamos una solución integral que combinó tecnología de vanguardia con metodologías probadas,
+                asegurando resultados excepcionales y superando las expectativas del cliente.
+              </p>
             </motion.div>
 
             {/* Additional Images */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-            >
-              <h2 className="text-2xl font-bold text-tertiary mb-6">Galería del Proyecto</h2>
-              <div className="grid md:grid-cols-2 gap-6">
-                {t.images.slice(1).map((image, index) => (
+            {work.image_urls && work.image_urls.length > 1 && (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.5 }}
+                className="grid sm:grid-cols-2 gap-4 sm:gap-6"
+              >
+                {work.image_urls.slice(1, 3).map((imageUrl, index) => (
                   <Image
                     key={index}
-                    src={image || "/placeholder.svg"}
-                    alt={`${t.title} - Imagen ${index + 2}`}
-                    width={600}
-                    height={400}
-                    className="w-full h-64 object-cover rounded-xl shadow-md"
+                    src={imageUrl || "/placeholder.svg"}
+                    alt={`${work.name} - Imagen ${index + 2}`}
+                    width={400}
+                    height={300}
+                    className="w-full h-48 sm:h-56 object-cover rounded-xl shadow-md"
                   />
                 ))}
-              </div>
-            </motion.div>
+              </motion.div>
+            )}
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             {/* Technologies */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="bg-white p-6 rounded-2xl shadow-sm"
+              className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm"
             >
-              <h3 className="text-xl font-bold text-tertiary mb-4">Tecnologías Utilizadas</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-tertiary mb-4">{t.technologies}</h3>
               <div className="space-y-2">
-                {t.technologies.map((tech, index) => (
-                  <div key={index} className="flex items-center text-sm text-neutral">
-                    <div className="w-2 h-2 bg-primary rounded-full mr-3" />
-                    {tech}
-                  </div>
+                {work.tags.map((tag, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="flex items-center text-sm text-neutral"
+                  >
+                    <div className="w-2 h-2 bg-primary rounded-full mr-3 flex-shrink-0" />
+                    <span>{tag}</span>
+                  </motion.div>
                 ))}
               </div>
             </motion.div>
@@ -230,15 +234,21 @@ export default function WorkDetailPage({ params }: { params: Promise<{ lang: str
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="bg-white p-6 rounded-2xl shadow-sm"
+              className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm"
             >
-              <h3 className="text-xl font-bold text-tertiary mb-4">Resultados Obtenidos</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-tertiary mb-4">{t.results}</h3>
               <div className="space-y-3">
-                {t.results.map((result, index) => (
-                  <div key={index} className="flex items-center text-sm text-neutral">
-                    <HiCheckCircle className="w-5 h-5 mr-3 text-success flex-shrink-0" />
-                    {result}
-                  </div>
+                {work.results.map((result, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="flex items-start text-sm text-neutral"
+                  >
+                    <HiCheckCircle className="w-5 h-5 mr-3 text-success flex-shrink-0 mt-0.5" />
+                    <span className="leading-relaxed">{result}</span>
+                  </motion.div>
                 ))}
               </div>
             </motion.div>
@@ -248,14 +258,14 @@ export default function WorkDetailPage({ params }: { params: Promise<{ lang: str
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
-              className="bg-primary p-6 rounded-2xl text-white"
+              className="bg-primary p-4 sm:p-6 rounded-2xl text-white"
             >
-              <h3 className="text-xl font-bold mb-3">¿Tienes un proyecto similar?</h3>
-              <p className="text-sm mb-4 opacity-90">
-                Contáctanos para discutir cómo podemos ayudarte a automatizar tus procesos.
-              </p>
+              <h3 className="text-lg sm:text-xl font-bold mb-3">{t.contactCTA}</h3>
+              <p className="text-sm mb-4 opacity-90 leading-relaxed">{t.contactDescription}</p>
               <Link href={`/${lang}#contacto`}>
-                <Button className="w-full bg-white text-primary hover:bg-gray-100">Contactar Ahora</Button>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button className="w-full bg-white text-primary hover:bg-gray-100">{t.contactNow}</Button>
+                </motion.div>
               </Link>
             </motion.div>
           </div>
