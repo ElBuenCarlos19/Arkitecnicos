@@ -75,17 +75,29 @@ export default function EditWorkPage({ params }: { params: Promise<{ id: string 
         return
       }
 
+      const validImageUrls = formData.image_urls.filter((url) => {
+        return (
+          url && url.trim() !== "" && !url.startsWith("blob:") && (url.startsWith("http") || url.startsWith("https"))
+        )
+      })
+
+      console.log("[v0] Valid image URLs for work update:", validImageUrls)
+
       const cleanData = {
         ...formData,
+        image_urls: validImageUrls,
         tags: formData.tags.filter((tag) => tag.trim() !== ""),
         results: formData.results.filter((result) => result.trim() !== ""),
       }
 
+      console.log("[v0] Updating work with data:", cleanData)
       await updateWork(Number(id), cleanData)
+      console.log("[v0] Work updated successfully")
+
       alert("Trabajo actualizado exitosamente")
       router.push("/ArkitecnicosDashboard/trabajos")
     } catch (error) {
-      console.error("Error updating work:", error)
+      console.error("[v0] Error updating work:", error)
       alert("Error al actualizar el trabajo")
     } finally {
       setLoading(false)
@@ -266,9 +278,10 @@ export default function EditWorkPage({ params }: { params: Promise<{ id: string 
           {/* Images */}
           <ImageUpload
             images={formData.image_urls}
-            onImagesChange={(images: any) => setFormData((prev) => ({ ...prev, image_urls: images }))}
+            onImagesChange={(images: string[]) => setFormData((prev) => ({ ...prev, image_urls: images }))}
             maxImages={4}
             folder="works"
+            itemId={formData.idname || id}
           />
 
           {/* Results */}

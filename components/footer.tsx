@@ -98,7 +98,7 @@ export function Footer({ lang }: FooterProps) {
             className="lg:col-span-2"
           >
             <Link href={`/${lang}`} className="text-2xl font-bold text-primary mb-4 block">
-              Arkitécnicos
+              Arkitecnicos
             </Link>
             <p className="text-gray-300 mb-6 leading-relaxed max-w-md">{t.description}</p>
 

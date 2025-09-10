@@ -1,7 +1,15 @@
 "use client"
 
-import { motion } from "framer-motion"
-import { HiArrowLeft, HiShoppingCart, HiChat, HiCheckCircle, HiStar } from "react-icons/hi"
+import { motion, AnimatePresence } from "framer-motion"
+import {
+  HiArrowLeft,
+  HiShoppingCart,
+  HiChat,
+  HiCheckCircle,
+  HiStar,
+  HiChevronLeft,
+  HiChevronRight,
+} from "react-icons/hi"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
@@ -21,6 +29,7 @@ const translations = {
     addedToCart: "¡Agregado al carrito!",
     loading: "Cargando producto...",
     error: "Error al cargar producto",
+    imageGallery: "Galería de Imágenes",
   },
   en: {
     backToProducts: "Back to Products",
@@ -32,6 +41,7 @@ const translations = {
     addedToCart: "Added to cart!",
     loading: "Loading product...",
     error: "Error loading product",
+    imageGallery: "Image Gallery",
   },
 }
 
@@ -42,6 +52,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ lang: 
   const [product, setProduct] = useState<ProductWithCategoryName | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   const { addItem } = useCart()
 
@@ -104,6 +115,19 @@ export default function ProductDetailPage({ params }: { params: Promise<{ lang: 
     setTimeout(() => setShowAddedMessage(false), 2000)
   }
 
+  const images =
+    product.images_url && product.images_url.length > 0
+      ? product.images_url
+      : ["/placeholder.svg?height=600&width=600&text=Producto"]
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length)
+  }
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)
+  }
+
   return (
     <div className="min-h-screen pt-20 pr-16">
       <div className="container-custom section-padding py-20">
@@ -123,19 +147,87 @@ export default function ProductDetailPage({ params }: { params: Promise<{ lang: 
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-12">
-          {/* Product Image */}
           <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8 }}>
-            <div className="relative">
-              <Image
-                src={product.images_url?.[0] || "/placeholder.svg?height=600&width=600&text=Producto"}
-                alt={product.name}
-                width={600}
-                height={600}
-                className="w-full h-auto rounded-2xl shadow-lg"
-              />
-              {product.products_category && (
-                <div className="absolute top-4 right-4 bg-primary text-white px-4 py-2 rounded-full font-bold text-lg">
-                  {product.products_category.name}
+            <div className="space-y-4">
+              {/* Main Image Container - Fixed Size */}
+              <div className="relative w-full h-96 bg-gray-100 rounded-2xl overflow-hidden shadow-lg">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentImageIndex}
+                    initial={{ opacity: 0, x: 100 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -100 }}
+                    transition={{ duration: 0.3 }}
+                    className="w-full h-full"
+                  >
+                    <Image
+                      src={images[currentImageIndex] || "/placeholder.svg"}
+                      alt={`${product.name} - Imagen ${currentImageIndex + 1}`}
+                      fill
+                      className="object-contain"
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      priority={currentImageIndex === 0}
+                    />
+                  </motion.div>
+                </AnimatePresence>
+
+                {/* Navigation Arrows - Only show if multiple images */}
+                {images.length > 1 && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={prevImage}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white shadow-md h-10 w-10 p-0"
+                    >
+                      <HiChevronLeft className="w-5 h-5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={nextImage}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white shadow-md h-10 w-10 p-0"
+                    >
+                      <HiChevronRight className="w-5 h-5" />
+                    </Button>
+
+                    {/* Image Counter */}
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
+                      {currentImageIndex + 1} / {images.length}
+                    </div>
+                  </>
+                )}
+
+                {/* Category Badge */}
+                {product.products_category && (
+                  <div className="absolute top-4 right-4 bg-primary text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg">
+                    {product.products_category.name}
+                  </div>
+                )}
+              </div>
+
+              {/* Thumbnail Navigation - Only show if multiple images */}
+              {images.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {images.map((image, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentImageIndex(index)}
+                      className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                        index === currentImageIndex
+                          ? "border-primary shadow-md"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
+                      <Image
+                        src={image || "/placeholder.svg"}
+                        alt={`${product.name} - Miniatura ${index + 1}`}
+                        fill
+                        className="object-cover"
+                        sizes="80px"
+                      />
+                    </button>
+                  ))}
                 </div>
               )}
             </div>

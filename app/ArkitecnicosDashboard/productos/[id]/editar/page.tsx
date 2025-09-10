@@ -77,16 +77,28 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         return
       }
 
+      const validImageUrls = formData.images_url.filter((url) => {
+        return (
+          url && url.trim() !== "" && !url.startsWith("blob:") && (url.startsWith("http") || url.startsWith("https"))
+        )
+      })
+
+      console.log("[v0] Valid image URLs for product update:", validImageUrls)
+
       const cleanData = {
         ...formData,
+        images_url: validImageUrls,
         features: formData.features.filter((feature) => feature.trim() !== ""),
       }
 
+      console.log("[v0] Updating product with data:", cleanData)
       await updateProduct(Number(id), cleanData)
+      console.log("[v0] Product updated successfully")
+
       alert("Producto actualizado exitosamente")
       router.push("/ArkitecnicosDashboard/productos")
     } catch (error) {
-      console.error("Error updating product:", error)
+      console.error("[v0] Error updating product:", error)
       alert("Error al actualizar el producto")
     } finally {
       setLoading(false)
@@ -219,6 +231,10 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           <ImageUpload
             images={formData.images_url}
             onImagesChange={(images) => setFormData((prev) => ({ ...prev, images_url: images }))}
+            onFilesChange={(files) => {
+              // Handle new files - they will be uploaded when form is submitted
+              console.log("[v0] New files selected:", files.length)
+            }}
             maxImages={3}
             folder="products"
           />

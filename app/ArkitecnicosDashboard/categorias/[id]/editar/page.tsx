@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { getProductsCategoryById, updateProductCategory } from "@/lib/db/products_category"
+import { uploadSingleImage } from "@/actions/single-image-upload"
+import SingleImageUpload from "@/components/single-image-upload"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { use } from "react"
@@ -18,6 +20,7 @@ export default function EditCategoryPage({ params }: { params: Promise<{ id: str
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)
+  const [imageFile, setImageFile] = useState<File | null>(null)
   const [formData, setFormData] = useState({
     idname: "",
     name: "",
@@ -69,6 +72,12 @@ export default function EditCategoryPage({ params }: { params: Promise<{ id: str
       const cleanData = {
         ...formData,
         items: formData.items.filter((item) => item.trim() !== ""),
+      }
+
+      if (imageFile) {
+        console.log("[v0] Uploading updated category image...")
+        const imageUrl = await uploadSingleImage(imageFile, "products", cleanData.idname)
+        cleanData.image_url = imageUrl
       }
 
       await updateProductCategory(Number(id), cleanData)
@@ -166,14 +175,12 @@ export default function EditCategoryPage({ params }: { params: Promise<{ id: str
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">URL de Imagen</label>
-            <Input
-              value={formData.image_url}
-              onChange={(e) => setFormData((prev) => ({ ...prev, image_url: e.target.value }))}
-              placeholder="https://ejemplo.com/imagen.jpg"
-            />
-          </div>
+          <SingleImageUpload
+            image={formData.image_url}
+            onImageChange={(url) => setFormData((prev) => ({ ...prev, image_url: url }))}
+            onFileChange={setImageFile}
+            folder="products"
+          />
 
           {/* Items */}
           <div>

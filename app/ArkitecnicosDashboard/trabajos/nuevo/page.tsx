@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { ImageUpload } from "@/components/image-upload"
 import { addWork } from "@/lib/db/works"
+import { uploadMultipleImages } from "@/actions/image-upload"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
@@ -27,6 +28,7 @@ export default function NewWorkPage() {
     image_urls: [] as string[],
     results: [""],
   })
+  const [newImageFiles, setNewImageFiles] = useState<File[]>([])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,23 +40,45 @@ export default function NewWorkPage() {
         return
       }
 
-      const cleanData = {
-        ...formData,
-        tags: formData.tags.filter((tag) => tag.trim() !== ""),
-        results: formData.results.filter((result) => result.trim() !== ""),
-        idname:
-          formData.idname ||
-          formData.name
-            .toLowerCase()
-            .replace(/\s+/g, "-")
-            .replace(/[^a-z0-9-]/g, ""),
+      const workId =
+        formData.idname ||
+        formData.name
+          .toLowerCase()
+          .replace(/\s+/g, "-")
+          .replace(/[^a-z0-9-]/g, "")
+
+      let allImageUrls = [...formData.image_urls]
+
+      if (newImageFiles.length > 0) {
+        console.log("[v0] Uploading", newImageFiles.length, "new images for work:", workId)
+        const uploadResult = await uploadMultipleImages(newImageFiles, "works", workId, 4)
+
+        if (uploadResult.success) {
+          allImageUrls = [...allImageUrls, ...uploadResult.urls]
+          console.log("[v0] Successfully uploaded images:", uploadResult.urls)
+        } else {
+          console.error("[v0] Error uploading images:", uploadResult.errors)
+          alert(`Error al subir imágenes: ${uploadResult.errors.join(", ")}`)
+          return
+        }
       }
 
+      const cleanData = {
+        ...formData,
+        image_urls: allImageUrls,
+        tags: formData.tags.filter((tag) => tag.trim() !== ""),
+        results: formData.results.filter((result) => result.trim() !== ""),
+        idname: workId,
+      }
+
+      console.log("[v0] Creating work with data:", cleanData)
       await addWork(cleanData)
+      console.log("[v0] Work created successfully")
+
       alert("Trabajo creado exitosamente")
       router.push("/ArkitecnicosDashboard/trabajos")
     } catch (error) {
-      console.error("Error creating work:", error)
+      console.error("[v0] Error creating work:", error)
       alert("Error al crear el trabajo")
     } finally {
       setLoading(false)
@@ -228,6 +252,7 @@ export default function NewWorkPage() {
           <ImageUpload
             images={formData.image_urls}
             onImagesChange={(images) => setFormData((prev) => ({ ...prev, image_urls: images }))}
+            onFilesChange={setNewImageFiles}
             maxImages={4}
             folder="works"
           />
@@ -270,7 +295,7 @@ export default function NewWorkPage() {
               {loading ? (
                 <div className="flex items-center">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Creando...
+                  {newImageFiles.length > 0 ? "Subiendo imágenes y creando..." : "Creando..."}
                 </div>
               ) : (
                 "Crear Trabajo"

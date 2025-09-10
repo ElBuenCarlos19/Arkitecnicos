@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { ImageUpload } from "@/components/image-upload"
 import { addProduct } from "@/lib/db/products"
 import { getAllProductsCategory } from "@/lib/db/products_category"
+import { uploadMultipleImages } from "@/actions/image-upload"
 import type { ProductCategory } from "@/lib/types/product"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -29,6 +30,7 @@ export default function NewProductPage() {
     specifications: {} as Record<string, string>,
     features: [""],
   })
+  const [newImageFiles, setNewImageFiles] = useState<File[]>([])
   const [specKey, setSpecKey] = useState("")
   const [specValue, setSpecValue] = useState("")
 
@@ -56,23 +58,44 @@ export default function NewProductPage() {
         return
       }
 
-      // Limpiar datos
-      const cleanData = {
-        ...formData,
-        features: formData.features.filter((feature) => feature.trim() !== ""),
-        idname:
-          formData.idname ||
-          formData.name
-            .toLowerCase()
-            .replace(/\s+/g, "-")
-            .replace(/[^a-z0-9-]/g, ""),
+      const productId =
+        formData.idname ||
+        formData.name
+          .toLowerCase()
+          .replace(/\s+/g, "-")
+          .replace(/[^a-z0-9-]/g, "")
+
+      let allImageUrls = [...formData.images_url]
+
+      if (newImageFiles.length > 0) {
+        console.log("[v0] Uploading", newImageFiles.length, "new images for product:", productId)
+        const uploadResult = await uploadMultipleImages(newImageFiles, "products", productId, 3)
+
+        if (uploadResult.success) {
+          allImageUrls = [...allImageUrls, ...uploadResult.urls]
+          console.log("[v0] Successfully uploaded images:", uploadResult.urls)
+        } else {
+          console.error("[v0] Error uploading images:", uploadResult.errors)
+          alert(`Error al subir imágenes: ${uploadResult.errors.join(", ")}`)
+          return
+        }
       }
 
-      await addProduct(cleanData)
+      const cleanData = {
+        ...formData,
+        images_url: allImageUrls,
+        features: formData.features.filter((feature) => feature.trim() !== ""),
+        idname: productId,
+      }
+
+      console.log("[v0] Creating product with data:", cleanData)
+      const newProduct = await addProduct(cleanData)
+      console.log("[v0] Product created successfully:", newProduct)
+
       alert("Producto creado exitosamente")
       router.push("/ArkitecnicosDashboard/productos")
     } catch (error) {
-      console.error("Error creating product:", error)
+      console.error("[v0] Error creating product:", error)
       alert("Error al crear el producto")
     } finally {
       setLoading(false)
@@ -197,6 +220,7 @@ export default function NewProductPage() {
           <ImageUpload
             images={formData.images_url}
             onImagesChange={(images) => setFormData((prev) => ({ ...prev, images_url: images }))}
+            onFilesChange={setNewImageFiles}
             maxImages={3}
             folder="products"
           />
@@ -290,7 +314,7 @@ export default function NewProductPage() {
               {loading ? (
                 <div className="flex items-center">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Creando...
+                  {newImageFiles.length > 0 ? "Subiendo imágenes y creando..." : "Creando..."}
                 </div>
               ) : (
                 "Crear Producto"
