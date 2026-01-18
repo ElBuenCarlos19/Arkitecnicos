@@ -11,7 +11,7 @@ export interface ImageUploadResult {
 
 export async function uploadAndOptimizeImage(
   file: File,
-  folder: "products" | "works" | "profiles",
+  folder: "products" | "works" | "profiles" | "facilities",
   itemId?: string | number,
   maxWidth = 1200,
   quality = 85,
@@ -103,7 +103,7 @@ export async function deleteImage(url: string): Promise<boolean> {
 
 export async function uploadMultipleImages(
   files: File[],
-  folder: "products" | "works" | "profiles",
+  folder: "products" | "works" | "profiles" | "facilities",
   itemId?: string | number,
   maxImages = 3,
 ): Promise<{ success: boolean; urls: string[]; errors: string[] }> {

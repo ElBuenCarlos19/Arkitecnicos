@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { HiCube, HiBriefcase, HiCog, HiUsers, HiTrendingUp, HiEye, HiDatabase, HiServer } from "react-icons/hi"
+import { HiCube, HiBriefcase, HiCog, HiUsers, HiTrendingUp, HiEye, HiDatabase, HiServer, HiLogout, HiArrowRight } from "react-icons/hi"
 import { getProducts } from "@/lib/db/products"
 import { getAllProductsCategory } from "@/lib/db/products_category"
 import { getWorks } from "@/lib/db/works"
 import { getServices } from "@/lib/db/services"
 import { getSystemStatus, type SystemStatus } from "@/actions/system-status"
+import { getCurrentUser, signOut } from "@/lib/db/auth"
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
 
 interface DashboardStats {
   products: number
@@ -25,13 +28,42 @@ export default function DashboardPage() {
   })
   const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null)
   const [loading, setLoading] = useState(true)
+  const router = useRouter()
 
   useEffect(() => {
-    loadDashboardData()
+    const checkAuth = async () => {
+      try {
+        const user = await getCurrentUser()
+        if (!user) {
+          router.push("/ArkitecnicosAdmin")
+          return
+        }
+
+        // Check if user has adminpage access
+        if (!user.profile?.adminpage) {
+          // If not admin, redirect to App
+          router.push("/ArkitecnicosApp")
+          return
+        }
+
+        // If authorized, load data
+        loadDashboardData()
+      } catch (error) {
+        console.error("Auth check error:", error)
+        router.push("/ArkitecnicosAdmin")
+      }
+    }
+
+    checkAuth()
+
     // Actualizar estado del sistema cada 30 segundos
-    const interval = setInterval(loadSystemStatus, 30000)
+    const interval = setInterval(() => {
+      // Only load if we passed auth check (simplified here as interval starts after mount)
+      // Ideally we check auth state, but for now this is fine
+      loadSystemStatus()
+    }, 30000)
     return () => clearInterval(interval)
-  }, [])
+  }, [router])
 
   const loadDashboardData = async () => {
     try {
@@ -64,6 +96,11 @@ export default function DashboardPage() {
     } catch (error) {
       console.error("Error loading system status:", error)
     }
+  }
+
+  const handleSignOut = async () => {
+    await signOut()
+    router.push("/ArkitecnicosAdmin")
   }
 
   const getStatusColor = (status: string) => {
@@ -128,23 +165,36 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-tertiary">Dashboard</h1>
           <p className="text-neutral mt-1">Resumen general del sistema</p>
         </div>
-        <div className="flex items-center space-x-2 text-sm text-neutral">
-          <HiEye className="w-4 h-4" />
-          <span>Última actualización: {new Date().toLocaleString()}</span>
+        <div className="flex items-center space-x-4">
+          <Button
+            onClick={() => router.push("/ArkitecnicosApp")}
+            variant="outline"
+            className="flex items-center"
+          >
+            Ir a App Interna
+            <HiArrowRight className="ml-2 w-4 h-4" />
+          </Button>
+          <div className="flex items-center space-x-2 text-sm text-neutral">
+            <HiEye className="w-4 h-4" />
+            <span>Última actualización: {new Date().toLocaleString()}</span>
+          </div>
+          <Button variant="ghost" size="sm" onClick={handleSignOut}>
+            <HiLogout className="w-5 h-5 text-red-500" />
+          </Button>
         </div>
       </div>
 

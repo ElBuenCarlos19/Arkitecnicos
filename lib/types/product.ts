@@ -69,6 +69,7 @@ export interface Profile {
   email: string | null
   avatar_url: string | null
   role: number | null
+  adminpage?: boolean
   created_at: string
   updated_at: string | null
 }

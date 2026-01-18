@@ -33,10 +33,10 @@ const translations = {
     contact: {
       title: "Contacto",
       address: "Av. 20 de Julio # 80-205, Nte. Centro Historico, Barranquilla, Atlántico",
-      phone: "+52 (55) 1234-5678",
+      phone: "+57 311 2148410",
       email: "contacto@arkitecnicos.com",
     },
-    copyright: "© 2024 Arkitécnicos. Todos los derechos reservados.",
+    copyright: "© 2026 Arkitécnicos. Todos los derechos reservados.",
     backToTop: "Volver arriba",
   },
   en: {
@@ -65,10 +65,10 @@ const translations = {
     contact: {
       title: "Contact",
       address: "Av. 20 de Julio # 80-205, Nte. Centro Historico, Barranquilla, Atlántico",
-      phone: "+52 (55) 1234-5678",
+      phone: "+57 311 2148410",
       email: "contacto@arkitecnicos.com",
     },
-    copyright: "© 2024 Arkitécnicos. All rights reserved.",
+    copyright: "© 2026 Arkitécnicos. All rights reserved.",
     backToTop: "Back to top",
   },
 }

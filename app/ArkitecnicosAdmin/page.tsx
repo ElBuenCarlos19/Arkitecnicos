@@ -27,11 +27,18 @@ export default function AdminLoginPage() {
     try {
       const user = await signIn(email, password)
 
-      if (user && user.role === 1) {
-        // Usuario es admin, redirigir al dashboard
-        router.push("/ArkitecnicosDashboard")
+      if (user && user.profile) {
+        // Check adminpage boolean
+        if (user.profile.adminpage) {
+          // If true, send to Dashboard
+          router.push("/ArkitecnicosDashboard")
+        } else {
+          // If false, send to App
+          router.push("/ArkitecnicosApp")
+        }
       } else {
-        setError("No tienes permisos de administrador")
+        // Fallback or error if no profile
+        setError("Error al obtener perfil de usuario")
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error de autenticación")
@@ -54,8 +61,8 @@ export default function AdminLoginPage() {
             <div className="flex justify-center mb-4">
               <Image src="/logo.png" alt="Arkitécnicos Logo" width={60} height={60} className="rounded-xl" />
             </div>
-            <h1 className="text-2xl font-bold text-tertiary mb-2">Panel de Administración</h1>
-            <p className="text-neutral text-sm">Acceso restringido para administradores</p>
+            <h1 className="text-2xl font-bold text-tertiary mb-2">Acceso Corporativo</h1>
+            <p className="text-neutral text-sm">Ingresa tus credenciales para continuar</p>
           </div>
 
           {/* Formulario */}
@@ -110,14 +117,14 @@ export default function AdminLoginPage() {
                   Iniciando sesión...
                 </div>
               ) : (
-                "Iniciar Sesión"
+                "Ingresar"
               )}
             </Button>
           </form>
 
           {/* Footer */}
           <div className="mt-8 text-center">
-            <p className="text-xs text-neutral">© 2024 Arkitécnicos. Sistema de administración seguro.</p>
+            <p className="text-xs text-neutral">© 2024 Arkitécnicos. Sistema interno.</p>
           </div>
         </div>
       </motion.div>

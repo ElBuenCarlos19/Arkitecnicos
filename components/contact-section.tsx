@@ -23,7 +23,7 @@ const translations = {
     info: {
       title: "Información de Contacto",
       address: "Av. 20 de Julio # 80-205, Nte. Centro Historico, Barranquilla, Atlántico",
-      phone: "+57 30000000",
+      phone: "+57 311 2148410",
       email: "contacto@arkitecnicos.com",
       hours: "Lun - Vie: 8:00 AM - 6:00 PM",
     },
@@ -44,7 +44,7 @@ const translations = {
     info: {
       title: "Contact Information",
       address: "Av. 20 de Julio # 80-205, Nte. Centro Historico, Barranquilla, Atlántico",
-      phone: "+57 30000000",
+      phone: "+57 311 2148410",
       email: "contact@arkitecnicos.com",
       hours: "Mon - Fri: 8:00 AM - 6:00 PM",
     },
@@ -93,7 +93,7 @@ export function ContactSection({ lang }: ContactSectionProps) {
               </div>
 
               <Input placeholder={t.form.subject} className="bg-white/10 border-white/20 text-white placeholder:text-gray-400" />
-              <Textarea placeholder={t.form.message} rows={5} className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 resize-none" />
+              <Textarea placeholder={t.form.message} rows={5} className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 resize-none h-50" />
 
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button className="w-full bg-primary hover:bg-primary/90 text-white py-3 group">

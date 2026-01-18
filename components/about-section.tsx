@@ -87,13 +87,14 @@ export function AboutSection({ lang }: AboutSectionProps) {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
+            className=""
           >
             <Image
-              src="/team.png"
+              src="/equipo.jpeg"
               alt="Arkitécnicos Team"
               width={500}
               height={300}
-              className="w-full h-auto rounded-2xl shadow-lg"
+              className="w-full h-100 rounded-2xl shadow-lg object-cover"
             />
           </motion.div>
 

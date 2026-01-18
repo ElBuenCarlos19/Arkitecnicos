@@ -1,0 +1,21 @@
+Sistema de delegados (clientes)
+
+Visitas de cotizacion - Otro Caso
+
+Tipos de visitas Facturacion (lleva un informe tecnico) y Cotizacion
+
+Necesitario un sistema de gestion de informacion, eliminar telegram
+
+Clientes: Cliente final - Cliente con varios edificios
+
+Agenda para la administradora
+
+Detalle: Visita tecnica (reparaciones) y visita comercial (cotizacion)
+
+4 tecnicos
+
+2 aux adminstrativos (los auxiliares escriben la resolucion)
+
+2 administradores
+
+Generar reporte tecnico 
